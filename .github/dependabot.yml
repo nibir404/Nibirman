@@ -7,6 +7,18 @@ updates:
     groups:
       minor-and-patch:
         update-types: [minor, patch]
+    ignore:
+      # Majors that need a planned migration, not an automatic bump
+      - dependency-name: next               # Next 16 is a framework migration
+        update-types: ["version-update:semver-major"]
+      - dependency-name: eslint-config-next # must match the Next.js major
+        update-types: ["version-update:semver-major"]
+      - dependency-name: eslint             # ESLint 10 needs the Next 16 config
+        update-types: ["version-update:semver-major"]
+      - dependency-name: typescript         # TS 7 (native compiler): migrate deliberately
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/node"      # keep in step with the Node runtime (22)
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: /
     schedule: { interval: monthly }

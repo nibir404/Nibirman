@@ -1,65 +1,89 @@
-# The Agentic PM — Vol. 1
+# The Agentic Renaissance
 
 > **Imtiaz Ahmed** · Agentic Product Manager · Dhaka (UTC+6)
 > *"I turn AI agents into products people trust."*
 
-A cinematic, anime-style portfolio that tells a whole career as a comic book you scroll through. The visitor opens the book, the camera dives through a 3D sky of clouds and sakura petals, and each chapter (who I am, what I'm good at, how I think, where I've worked, case studies, and how to hire me) plays out like a scene from an anime.
+A portfolio told as a commission of paintings. Your career is painted in oil, the machine's view of it is rendered live in WebGL shaders (pixels, dither, ASCII), and the whole site re-inks itself by the **real time in Dhaka**: dawn, day, dusk, night.
 
-The design source is the **"Nibirman Website"** file in Paper (page *Immersive Comic (v6)*).
+The design source is the **"Nibirman Website"** file in Paper (page *v7 · Agentic Renaissance*). The scroll choreography is modelled on Shopify Editions, *The Renaissance Edition*.
 
 ---
 
 ## Contents
 
-- [Experience walkthrough](#experience-walkthrough)
+- [What's on the site](#whats-on-the-site)
+- [The four acts of the day](#the-four-acts-of-the-day)
+- [How the machine sees you (shaders)](#how-the-machine-sees-you-shaders)
 - [Tech stack](#tech-stack)
 - [Getting started](#getting-started)
+- [Editing content](#editing-content)
+- [Writing a Notebook post](#writing-a-notebook-post)
 - [Project structure](#project-structure)
-- [Editing the content](#editing-the-content)
-- [How the motion works](#how-the-motion-works)
-- [Accessibility and SEO](#accessibility-and-seo)
+- [Accessibility & fallbacks](#accessibility--fallbacks)
 - [Deployment](#deployment)
-- [Versioning and releases](#versioning-and-releases)
+- [Versioning & releases](#versioning--releases)
 - [Roadmap](#roadmap)
 
 ---
 
-## Experience walkthrough
+## What's on the site
 
-| # | Chapter | What happens |
-|---|---------|--------------|
-| 00 | **Cover** | A closed comic book, *"The Agentic PM, Vol. 1."* Click it or press any key and the cover swings open in 3D. |
-| 01 | **Who I am: the scroll film** | A pinned, five-screen sequence. Each anime still slowly zooms in while a huge comic word (**IMTIAZ → QUESTIONS FIRST → BUILT FOR EVERYONE → SHIPPED.**) slams in letter by letter, then breaks apart as a speed-line wipe cuts to the next shot. It ends on a parallax portrait, an "I'M IMTIAZ." sticker and the key stats. |
-| 02 | **Power-ups** | Four trading cards are dealt onto the table. Hover or tap a card to flip it and see the proof. |
-| 03 | **How I think** | A pinned manga strip that scrolls sideways: Ask → Listen → Build → Measure. |
-| 04 | **Worlds** | Five industry stickers spring onto the page. You can drag them around. |
-| 05 | **Volumes** | Case studies sit on a shelf as comic volumes. Use ← → and Enter, or click. Each one opens into a full-screen scene: the problem, then my move, then the result. |
-| 06 | **Join the party** | Press the CV-O-MATIC and it prints a CV page. Hire Me and Partner With Me buttons, plus email and social links. |
+| Route | Page | What happens |
+|-------|------|--------------|
+| `/` | **Home** | A preloader resolves your portrait from ASCII → dither → oil. Then a **pinned hero** in the scroll style of Shopify Editions: your portrait stands in an arch, split by a seam you can drag into **oil · pixel band · manga ink**. As you scroll, the title flies into a fixed **chapter index** (top-left, with counts), the arch swells, and a **portal** opens from the seam into Act II. Next comes the **train journey**, a pinned window over an engraved Bengal landscape with parallax layers and a platform board for each career station. Then **torn-paper sheets** slide up one over another: Capabilities (a blueprint grid plus a live dither engraving), Works (a catalogue whose hover previews sharpen from pixels to oil) and the Commission finale. |
+| `/evolution` | **Evolution** | Five acts on a spine that draws itself as you scroll: the Apprentice, the Archivist, the Voyager, the Teacher and the Maker of Automatons. Act V includes the *agent's view*, a live ASCII portrait. |
+| `/works/[slug]` | **Case study** | A painted plate that resolves from pixels and tears into paper, a fixed section index, a facts row, a large decorative first letter on the problem, a ledger of three decisions and what each cost, the result, and a link to the next plate. |
+| `/notebooks` | **Blog index** | *Codex Nibirman*: a featured folio, topic filters, a ruled ledger of posts, and subscribe/RSS. |
+| `/notebooks/[slug]` | **Blog post** | A reading-progress line, a painted plate that loads as a dither, long-form typography, and previous/share links. |
+| `/notebooks/rss.xml` | RSS | Generated from the markdown files. |
+| `/contact` | **Contact** | The form *is* a letter. Visitors fill in the blanks and press the wax seal to send it. |
+| `/resume` | **Résumé** | An engraved 3D printer builds your CV as a stone tablet, layer by layer, while a console logs your career. Then you take it off the bed to download the PDF. |
+| `/list` | Plain list | The whole story with no motion or WebGL, for SEO, screen readers and slow phones. |
 
-Always on screen:
-- a 3D **sky** (Three.js) whose camera flies forward as you scroll;
-- an orange **ink thread** that draws itself across the page, with Biscuit the mascot riding its tip;
-- a **chapter rail** you can click to jump;
-- a **Color ⇄ Manga** switch that turns everything black-and-white with screentone;
-- an optional ambient **sound pad**;
-- film grain.
+## The four acts of the day
+
+The palette follows the real clock in `Asia/Dhaka` (`src/lib/time.ts`):
+
+| Act | Dhaka time | Palette |
+|-----|-----------|---------|
+| Dawn | 05:00–08:00 | Parchment, dusk-ink and rose: *Fajr light over the Buriganga* |
+| Day | 08:00–16:30 | Cobalt ink on parchment |
+| Dusk | 16:30–19:00 | Oxblood, cream and gold: *Golden hour, oil on canvas* |
+| Night | 19:00–05:00 | Indigo and gold leaf |
+
+- **No flash on load.** An inline script in `layout.tsx` paints the right act before React loads.
+- **Preview another act.** Visitors can use the four dots in the masthead. You can also link to a specific act with `?time=dusk`.
+- **Shaders follow too.** They read the act's ink and paper colours, so a dither print turns cream-on-indigo at night.
+
+## How the machine sees you (shaders)
+
+All three passes live in `src/components/gl/shaders.ts` and run on the oil paintings in real time with raw Three.js, one full-screen quad per image.
+
+| Pass | Shader | Used on |
+|------|--------|---------|
+| I · Pixelate | `uv = floor(uv·res/cell)·cell/res`. `uProgress` shrinks the cell size from 48px to 1px. | Works hover previews, case-study hero |
+| II · Bayer dither | A 4×4 ordered threshold on brightness, printed in the act's ink and paper colours. | Hero seam band, Capabilities engraving, blog plates while loading |
+| III · ASCII | One glyph per 8×14px cell from the ramp `" .:-=+*#%@"`, using a glyph atlas drawn on a canvas. | Preloader, Evolution "agent's view" |
+| Resolve | ASCII → dither → oil, driven by `uProgress`. | Preloader |
+| Oil ⇄ Ink | Oil figure, a dither band and the manga twin, split at `uSeam` (drag or cursor). | Home hero |
+
+`MachineImage` and `OilInkPortrait` render only while on screen. Without WebGL, or with reduced motion turned on, they show the plain painting.
 
 ## Tech stack
 
 | Concern | Library |
 |---------|---------|
-| Framework | [Next.js 15](https://nextjs.org) (App Router, static export friendly) + React 19 + TypeScript |
-| Styling | [Tailwind CSS v4](https://tailwindcss.com) (theme tokens live in `src/app/globals.css`) |
-| Smooth scroll | [Lenis](https://lenis.darkroom.engineering) |
-| Scroll timelines | [GSAP](https://gsap.com) + ScrollTrigger + `@gsap/react` |
-| UI motion | [Framer Motion](https://www.framer.com/motion/) (springs, drag, presence, flips) |
-| 3D | [Three.js](https://threejs.org) via [@react-three/fiber](https://r3f.docs.pmnd.rs) (+ drei available) |
-| Fonts | Archivo Black (display), Inter (body), JetBrains Mono (labels) via `next/font` |
-| Sound | Web Audio API (generated pad, no audio files) |
+| Framework | Next.js 15 (App Router, statically generated), React 19, TypeScript |
+| Styling | Tailwind CSS v4. Colour tokens are CSS variables set by the clock. |
+| Scroll | Lenis smooth scroll on the GSAP ticker. GSAP ScrollTrigger handles pins, scrubs and sheet stacking; SplitText handles title reveals. |
+| UI motion | Framer Motion: cursor, card fills, hover plates, wax seal |
+| WebGL | Three.js with custom GLSL fragment shaders |
+| Blog | Markdown files parsed with gray-matter and marked |
+| Fonts | Instrument Serif, Inter Tight and JetBrains Mono via `next/font` |
 
 ## Getting started
 
-Requirements: **Node 20+** and npm 10+.
+Requires **Node 20+**.
 
 ```bash
 npm install
@@ -69,88 +93,97 @@ npm install
 npm run dev
 ```
 
-Open <http://localhost:3000>.
+Open <http://localhost:3000>. Add `?time=night` (or `dawn`, `day`, `dusk`) to preview an act.
 
 | Script | What it does |
 |--------|--------------|
 | `npm run dev` | Dev server with hot reload |
-| `npm run build` | Production build (type-check + lint) |
+| `npm run build` | Production build (type-checks and lints) |
 | `npm start` | Serve the production build |
-| `npm run lint` | ESLint |
+
+## Editing content
+
+**All career copy lives in `src/lib/career.ts`:** profile, stats, the five acts, capabilities, the five works (with full case-study content), the method loop and the home chapter index. Lines marked `TODO(verify)` are placeholders written during design. Please confirm them.
+
+- **CV:** put your PDF at `public/cv.pdf`. The résumé page and the CTAs link to it.
+- **Paintings:** these are in `public/paintings/`, generated in Paper from your portrait. `figure-oil.webp` and `figure-ink.webp` are the same pose; keep them aligned if you replace one.
+- **Contact delivery:** by default the wax seal opens the visitor's mail app with the letter filled in. To receive letters directly, set `NEXT_PUBLIC_FORM_ENDPOINT` to a form service URL such as Formspree. The form posts JSON to it.
+- **Site URL:** set `NEXT_PUBLIC_SITE_URL` (for example `https://nibirman.com`) so the RSS feed and social preview images use absolute links.
+
+## Writing a Notebook post
+
+Create `content/notebooks/<slug>.md`:
+
+```md
+---
+title: "Hephaestus had a"
+titleItalic: "human in the loop."     # optional, italic second line
+dek: "One-sentence standfirst."
+date: "2026-11-14"
+topic: "Agents"                        # becomes a filter on the index
+cover: "/paintings/forge.jpg"          # optional painted plate
+coverCaption: "The forge of automatons, oil on linen"
+draft: false                           # true hides it in production
+---
+
+Your first paragraph gets the large decorative first letter automatically.
+
+> A blockquote becomes the pull quote.
+
+## Headings, lists, `code`, images and links are all styled.
+```
+
+Folio numbers (I, II, III…), reading time, the index, the post page and RSS are all generated. Commit the file and redeploy.
 
 ## Project structure
 
 ```
+content/notebooks/          markdown posts
+public/paintings/           oil paintings + the oil/ink figure pair
 src/
 ├── app/
-│   ├── layout.tsx          # fonts, metadata, <html>
-│   ├── globals.css         # Tailwind theme tokens, panel/halftone/grain/speedline utilities, manga mode
-│   ├── page.tsx            # the comic experience
-│   └── list/page.tsx       # plain-text version (no JS, SEO, screen readers)
+│   ├── layout.tsx          fonts, metadata, inline Dhaka-clock theme boot
+│   ├── page.tsx            home
+│   ├── evolution/  works/[slug]/  notebooks/  notebooks/[slug]/  notebooks/rss.xml/
+│   ├── contact/  resume/  list/
+│   └── globals.css         tokens, paper grain, folio typography
 ├── components/
-│   ├── Experience.tsx      # orchestrates cover → scene → chapters
-│   ├── SmoothScroll.tsx    # Lenis ⇄ GSAP ticker bridge + shared scroll state
-│   ├── Cover.tsx           # opening book
-│   ├── Hud.tsx             # top bar, chapter rail, ink thread, manga + sound toggles
-│   ├── useAmbient.ts       # Web Audio ambient pad
-│   ├── three/SkyScene.tsx  # R3F clouds, instanced sakura petals, scroll-driven camera
-│   └── chapters/           # one file per chapter
-│       ├── ChapterShell.tsx
-│       ├── Film.tsx  Who.tsx  PowerUps.tsx  Think.tsx
-│       └── Worlds.tsx  Volumes.tsx  Join.tsx
+│   ├── gl/                 shaders.ts · useShaderCanvas · MachineImage · OilInkPortrait
+│   ├── home/               Hero · ChapterIndex · Journey · Sheet/SheetStack · Capabilities · Works · Commission
+│   ├── pages/              Evolution · CaseStudy · Letter · Printer · NotebooksIndex · FolioChrome
+│   ├── Providers · TimeProvider · SmoothScroll · Masthead · InkCursor · Preloader · TornEdge · Footer
 └── lib/
-    └── career.ts           # ← ALL copy and data lives here
-public/
-└── anime/                  # anime illustrations exported from the Paper file
+    ├── career.ts           ← all copy
+    ├── notebooks.ts        ← markdown loader
+    └── time.ts             ← Dhaka clock + palettes
 ```
 
-## Editing the content
+## Accessibility & fallbacks
 
-All the text lives in **`src/lib/career.ts`**: profile, stats, power-ups, the thinking loop, industries, teams, case-study volumes and the scroll-film beats. The comic and the `/list` page both read from it, so you only edit in one place.
-
-- **Add a case study:** add an object to `volumes`. Put its art in `public/anime/` and point `img` at it.
-- **Swap the art:** replace the files in `public/anime/` and keep the same names.
-- **CV download:** put your PDF at `public/cv.pdf`. The "Print my CV" button links there.
-- **Real soundtrack:** put a file at `public/audio/theme.mp3` and swap `useAmbient` for an `<audio>` element.
-
-## How the motion works
-
-- **One clock.** Lenis drives the scroll. Its `raf` runs on GSAP's ticker, and every Lenis scroll event calls `ScrollTrigger.update()`. So smooth scrolling, the GSAP scrubs and the Three.js camera all stay in sync.
-- **Shared scroll state.** `scrollState` (progress and velocity) is a plain object in `SmoothScroll.tsx`. The 3D camera and the ink thread read it every frame, which avoids React re-renders. Scroll velocity also speeds up how fast the petals fall.
-- **Pinned scenes** (Film, Think) are GSAP timelines with `scrub` and `pin`. Think uses `containerAnimation` to zoom each panel as it scrolls sideways.
-- **Interaction motion** (card flips, sticker drags, case-study reveals, CV printer) is Framer Motion springs and `AnimatePresence`.
-- **WebGL** loads only on the client (`next/dynamic`, `ssr: false`). It uses no textures from the network: the cloud sprite is drawn on a canvas, and the petals are one instanced mesh of 420 petals.
-
-## Accessibility and SEO
-
-- `prefers-reduced-motion` turns off Lenis smoothing, the pinned GSAP scenes and the film grain. Content stays readable.
-- `/list` is a server-rendered version of the whole story with no motion, and it's linked from the cover.
-- Arrow keys and Enter browse the case studies. Esc or B closes a volume.
-- Buttons and dialogs have labels, and images have alt text.
+- **Reduced motion:** with `prefers-reduced-motion`, there are no pins, scrubs or preloader, and the shaders show static oil.
+- **No WebGL:** each image falls back to a plain `<img>`.
+- **Keyboard and screen readers:** the act switch is a labelled radio group, the chapter index and filters are buttons, the letter's blanks are real labelled inputs, and the print console is `aria-live`.
+- **Plain version:** `/list` has the whole story as plain text.
 
 ## Deployment
 
-The easiest host is **Vercel**:
+The site is fully static, so **Vercel** is the easiest host:
 
 ```bash
 npx vercel
 ```
 
-Or build it and serve it on any Node host with `npm run build && npm start`.
+Set `NEXT_PUBLIC_SITE_URL`, and optionally `NEXT_PUBLIC_FORM_ENDPOINT`, in the project's environment variables.
 
-Before going live, set `metadataBase` in `src/app/layout.tsx` to the production URL so Open Graph images resolve.
+## Versioning & releases
 
-## Versioning and releases
+The project follows [Semantic Versioning](https://semver.org) and [Conventional Commits](https://www.conventionalcommits.org). Every release is tagged and recorded in [`CHANGELOG.md`](./CHANGELOG.md).
 
-This project follows **[Semantic Versioning](https://semver.org)** and **[Conventional Commits](https://www.conventionalcommits.org)**.
-
-| Change | Bump | Example commit |
-|--------|------|----------------|
-| New chapter or feature | **minor** `1.x.0` | `feat(volumes): add LIMS case study` |
-| Fix or copy tweak | **patch** `1.0.x` | `fix(film): first word visible on open` |
-| Redesign or breaking structure | **major** `x.0.0` | `feat!: replace comic with ...` |
-
-Release steps:
+| Change | Bump | Example |
+|--------|------|---------|
+| New page or section | minor | `feat(notebooks): add tag pages` |
+| Fix or copy edit | patch | `fix(hero): seam handle on touch` |
+| Redesign | major | `feat!: …` |
 
 ```bash
 npm version minor -m "chore(release): v%s"
@@ -160,16 +193,16 @@ npm version minor -m "chore(release): v%s"
 git push --follow-tags
 ```
 
-Then add the notes to [`CHANGELOG.md`](./CHANGELOG.md) and publish a GitHub Release from the tag. `main` is always deployable. Do work on `feat/*` or `fix/*` branches and merge them through a PR.
+`main` is always deployable. Do work on `feat/*` or `fix/*` branches.
 
 ## Roadmap
 
-- [ ] Real CV PDF (`public/cv.pdf`) and real social URLs in `career.ts`
-- [ ] Commissioned soundtrack to replace the generated pad
-- [ ] Remaining case-study scenes from Paper: 988 Crisis, LIMS, Fuudy, Poridhi
-- [ ] Sky & Sakura UI kit (v2) and the ORBIT agent demo
-- [ ] Optimise the art (AVIF/WebP), and add a mobile-specific scroll film
+- [ ] Real `public/cv.pdf` and real social URLs in `career.ts`
+- [ ] Confirm all `TODO(verify)` copy (act order and roles, case-study details)
+- [ ] A shader 404 page (ASCII)
+- [ ] Mobile pass on the train journey and hero labels
+- [ ] Optional soundtrack (lute + tanpura)
 
 ---
 
-© Imtiaz Ahmed. All rights reserved. The illustrations and copy are personal work and are not licensed for reuse.
+© Imtiaz Ahmed. Paintings and copy are personal work and are not licensed for reuse.

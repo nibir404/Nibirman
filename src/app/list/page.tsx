@@ -33,7 +33,8 @@ export default function PlainList() {
         <article key={w.slug} className="mt-6">
           <h3 className="font-serif text-2xl"><Link href={`/works/${w.slug}`}>{w.name}{w.italic ? ` ${w.italic}` : ""}</Link> <span className="label">{w.tag}</span></h3>
           <p>{w.logline}</p>
-          <p><b>Result:</b> {w.outcome}</p>
+          <p><b>In numbers:</b> {w.resultBig} — {w.resultNote}</p>
+          <p><a className="underline" href={w.url}>{w.url}</a></p>
         </article>
       ))}
 

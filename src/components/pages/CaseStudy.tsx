@@ -14,9 +14,10 @@ import { useLenis } from "@/components/SmoothScroll";
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 const sections = [
-  { id: "problem", label: "The problem" },
-  { id: "decisions", label: "Decisions" },
-  { id: "result", label: "The result" },
+  { id: "what", label: "What it is" },
+  { id: "does", label: "What it does" },
+  { id: "numbers", label: "In numbers" },
+  { id: "role", label: "My part" },
 ];
 
 /** A single plate: painted hero tearing into paper, sticky index, swash chapters, decision ledger. */
@@ -53,7 +54,7 @@ export default function CaseStudy({ index }: { index: number }) {
         <div className="cs-hero-img absolute inset-0">
           <MachineImage photo={w.img} mode="pixel" cell={48} progressRef={reveal} className="h-full w-full" />
         </div>
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,14,40,0.6)_0%,transparent_22%,transparent_45%,rgba(10,14,40,0.85)_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,14,40,0.72)_0%,rgba(10,14,40,0.5)_35%,rgba(10,14,40,0.55)_60%,rgba(10,14,40,0.92)_100%)]" />
         <div className="absolute inset-x-5 bottom-28 flex flex-wrap items-end justify-between gap-6 text-[#f8f3e7] md:inset-x-10">
           <div>
             <p className="label">
@@ -104,36 +105,59 @@ export default function CaseStudy({ index }: { index: number }) {
             ))}
           </dl>
 
-          <section id="problem" className="mt-20">
-            <p className="label text-muted">01 — The problem</p>
+          <section id="what" className="mt-20">
+            <p className="label text-muted">01 — What it is</p>
             <h2 className="cs-reveal mt-6 flex items-end gap-1 font-serif">
-              <span className="text-[150px] italic leading-[0.8] md:text-[220px]">{w.problem.cap}</span>
-              <span className="pb-2 text-5xl serif-tight md:text-7xl">{w.problem.lead}</span>
+              <span className="text-[150px] italic leading-[0.8] md:text-[220px]">{w.what.cap}</span>
+              <span className="pb-2 text-5xl serif-tight md:text-7xl">{w.what.lead}</span>
             </h2>
             <div className="cs-reveal mt-10 grid gap-8 text-lg leading-relaxed md:grid-cols-2">
-              {w.problem.body.map((p) => <p key={p}>{p}</p>)}
+              {w.what.body.map((p) => <p key={p}>{p}</p>)}
             </div>
           </section>
 
-          <section id="decisions" className="mt-24">
-            <p className="label text-muted">02 — Three decisions, and what each one cost</p>
+          <section id="does" className="mt-24">
+            <p className="label text-muted">02 — What it does</p>
             <ol className="mt-6 border-t border-ink">
-              {w.decisions.map((d, i) => (
-                <li key={d.title} className="cs-reveal grid gap-4 border-b hair py-6 md:grid-cols-[4rem_1fr_22rem] md:items-baseline">
-                  <span className="font-serif text-4xl">{["i.", "ii.", "iii."][i]}</span>
+              {w.features.map((d, i) => (
+                <li key={d.title} className="cs-reveal grid gap-4 border-b hair py-6 md:grid-cols-[4rem_1fr_24rem] md:items-baseline">
+                  <span className="font-serif text-4xl">{["i.", "ii.", "iii.", "iv."][i]}</span>
                   <span className="font-serif text-3xl leading-tight">{d.title}</span>
-                  <span className="text-[15px] leading-relaxed"><b className="font-semibold">Gave up:</b> {d.gaveUp}</span>
+                  <span className="text-[15px] leading-relaxed">{d.body}</span>
                 </li>
               ))}
             </ol>
           </section>
 
-          <section id="result" className="cs-reveal mt-24 flex flex-wrap items-center gap-10 border-y border-ink py-10">
-            <span className="whitespace-nowrap font-serif text-[140px] leading-[0.8] serif-tight md:text-[220px]">{w.resultBig}</span>
-            <div className="max-w-xl">
-              <p className="label text-muted">03 — The result</p>
-              <p className="mt-3 font-serif text-4xl leading-tight">{w.outcome}</p>
+          <section id="numbers" className="mt-24">
+            <div className="cs-reveal flex flex-wrap items-center gap-10 border-y border-ink py-10">
+              <span className="whitespace-nowrap font-serif text-[120px] leading-[0.8] serif-tight md:text-[200px]">{w.resultBig}</span>
+              <div className="max-w-xl">
+                <p className="label text-muted">03 — In numbers</p>
+                <p className="mt-3 font-serif text-3xl leading-tight md:text-4xl">{w.resultNote}</p>
+              </div>
             </div>
+            {w.numbers.length > 1 && (
+              <dl className="cs-reveal grid grid-cols-2 border-b hair md:grid-cols-3">
+                {w.numbers.map((n) => (
+                  <div key={n.label} className="border-r hair py-6 pr-4 last:border-r-0">
+                    <dt className="font-serif text-5xl">{n.value}</dt>
+                    <dd className="label mt-2 text-muted">{n.label}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+          </section>
+
+          <section id="role" className="cs-reveal mt-24 grid gap-8 md:grid-cols-[1fr_auto] md:items-end">
+            <div>
+              <p className="label text-muted">04 — My part</p>
+              <p className="mt-3 font-serif text-4xl leading-tight">{w.role}</p>
+              <p className="mt-3 max-w-2xl text-lg leading-relaxed text-muted">{w.contribution}</p>
+            </div>
+            <a href={w.url} target="_blank" rel="noreferrer" data-cursor="Visit" className="rounded-full bg-ink px-7 py-4 font-mono text-xs uppercase tracking-[0.18em] text-paper hover:opacity-85">
+              Visit the live site ↗
+            </a>
           </section>
 
           <Link href={`/works/${next.slug}`} className="group mt-16 flex items-end justify-between gap-6" data-cursor="Next">

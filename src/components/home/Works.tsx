@@ -33,7 +33,7 @@ export default function Works() {
             The <em>works</em>
           </h2>
           <p className="max-w-sm font-serif text-xl leading-snug text-muted">
-            Five commissions, catalogued. Each plate leads with what changed for the people who used it.
+            Eight commissions, catalogued. Each plate is the live product, printed as an engraving.
           </p>
         </div>
 

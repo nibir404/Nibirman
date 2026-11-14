@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { dhakaClock, palettes, phases } from "@/lib/time";
+import { dhakaClock, now, palettes, phases } from "@/lib/time";
 import { useTime } from "@/components/TimeProvider";
 
 const links = [
@@ -22,10 +22,14 @@ export default function Masthead() {
   const [clock, setClock] = useState("--:--:--");
 
   useEffect(() => {
-    const t = () => setClock(dhakaClock());
+    // tick exactly on each second of the (server-corrected) clock
+    let id = 0;
+    const t = () => {
+      setClock(dhakaClock());
+      id = window.setTimeout(t, 1000 - (now().getTime() % 1000) + 5);
+    };
     t();
-    const id = setInterval(t, 1000);
-    return () => clearInterval(id);
+    return () => window.clearTimeout(id);
   }, []);
 
   return (

@@ -77,8 +77,36 @@ export const palettes: Record<Phase, Palette> = {
   },
 };
 
+// ── Real time ────────────────────────────────────────────────────────────
+// The visitor's device clock can be wrong. We measure the offset against the
+// server's clock (the HTTP Date header of a request back to this site, corrected
+// for half the round trip) and use `now()` everywhere instead of `new Date()`.
+let offsetMs = 0;
+let synced = false;
+export const now = () => new Date(Date.now() + offsetMs);
+export const isSynced = () => synced;
+
+export async function syncClock(): Promise<number> {
+  if (typeof window === "undefined") return 0;
+  try {
+    const t0 = Date.now();
+    const res = await fetch(`/?_t=${t0}`, { method: "HEAD", cache: "no-store" });
+    const t1 = Date.now();
+    const server = Date.parse(res.headers.get("date") ?? "");
+    if (!Number.isNaN(server)) {
+      // Date header has 1s resolution: assume the middle of that second.
+      offsetMs = server + 500 - (t0 + (t1 - t0) / 2);
+      if (Math.abs(offsetMs) < 1500) offsetMs = 0; // within header precision → trust the device
+      synced = true;
+    }
+  } catch {
+    /* offline: keep the device clock */
+  }
+  return offsetMs;
+}
+
 /** Hour in Dhaka as a float, e.g. 17.5 = 5:30 pm. */
-export function dhakaHour(d = new Date()): number {
+export function dhakaHour(d = now()): number {
   const parts = new Intl.DateTimeFormat("en-GB", {
     timeZone: "Asia/Dhaka",
     hour: "2-digit",
@@ -97,7 +125,7 @@ export function phaseAt(hour: number): Phase {
   return "night";
 }
 
-export function dhakaClock(d = new Date()): string {
+export function dhakaClock(d = now()): string {
   return new Intl.DateTimeFormat("en-GB", {
     timeZone: "Asia/Dhaka",
     hour: "2-digit",

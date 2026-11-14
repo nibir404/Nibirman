@@ -35,7 +35,13 @@ export default function Letter() {
   const [stamp, setStamp] = useState({ no: "0000", time: "" });
   const set = (k: keyof typeof f) => (v: string) => setF((s) => ({ ...s, [k]: v }));
 
-  useEffect(() => setStamp({ no: String(Math.floor(Math.random() * 9000) + 1000), time: dhakaClock().slice(0, 5) }), []);
+  useEffect(() => {
+    const no = String(Math.floor(Math.random() * 9000) + 1000);
+    const t = () => setStamp({ no, time: dhakaClock().slice(0, 5) });
+    t();
+    const id = setInterval(t, 15_000); // the letter's postmark keeps Dhaka time while you write
+    return () => clearInterval(id);
+  }, []);
 
   const body = `Dear Imtiaz,\n\nMy name is ${f.name}, and I write from ${f.company}, where we're building ${f.building}. We'd like you as ${f.role}; please reply to ${f.email}.\n\n${f.ps ? "P.S. " + f.ps + "\n\n" : ""}Yours,\n${f.name.split(" ")[0]}`;
 

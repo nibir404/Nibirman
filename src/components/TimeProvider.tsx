@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { dhakaHour, palettes, phaseAt, type Palette, type Phase } from "@/lib/time";
+import { dhakaHour, now, palettes, phaseAt, syncClock, type Palette, type Phase } from "@/lib/time";
 
 type Ctx = {
   phase: Phase;
@@ -21,14 +21,27 @@ export default function TimeProvider({ children }: { children: React.ReactNode }
   const [resolved, setResolved] = useState(false); // the inline boot script already painted the right act
 
   useEffect(() => {
-    const tick = () => setLive(phaseAt(dhakaHour()));
+    let timer = 0;
+    // re-evaluate the act now, then exactly at the next minute boundary, every minute
+    const tick = () => {
+      setLive(phaseAt(dhakaHour()));
+      const ms = 60_000 - (now().getTime() % 60_000) + 50;
+      window.clearTimeout(timer);
+      timer = window.setTimeout(tick, ms);
+    };
     tick();
     setResolved(true);
-    const id = setInterval(tick, 30_000);
+    syncClock().then(tick); // correct for a wrong device clock
+    // hidden tabs throttle timers: resync when the visitor comes back
+    const onVisible = () => document.visibilityState === "visible" && syncClock().then(tick);
+    document.addEventListener("visibilitychange", onVisible);
     // ?time=dusk lets you share / test a specific act
     const q = new URLSearchParams(location.search).get("time") as Phase | null;
     if (q && q in palettes) setOverride(q);
-    return () => clearInterval(id);
+    return () => {
+      window.clearTimeout(timer);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, []);
 
   const phase = override ?? live;

@@ -26,6 +26,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
   if (i < 0) notFound();
   const f = all[i];
   const prev = all[i + 1];
+  const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://nibirman.vercel.app"}/notebooks/${f.slug}`;
 
   return (
     <>
@@ -66,8 +67,8 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
         <div className="flex flex-col items-end gap-2">
           <span className="label text-muted">Share this folio</span>
           <span className="label flex gap-3">
-            <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://nibirman.com/notebooks/${f.slug}`)}`} target="_blank" rel="noreferrer">LinkedIn</a>·
-            <a href={`https://x.com/intent/post?text=${encodeURIComponent(`${f.title} ${f.titleItalic ?? ""}`)}&url=${encodeURIComponent(`https://nibirman.com/notebooks/${f.slug}`)}`} target="_blank" rel="noreferrer">X</a>
+            <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`} target="_blank" rel="noreferrer">LinkedIn</a>·
+            <a href={`https://x.com/intent/post?text=${encodeURIComponent(`${f.title} ${f.titleItalic ?? ""}`)}&url=${encodeURIComponent(url)}`} target="_blank" rel="noreferrer">X</a>
           </span>
         </div>
       </nav>

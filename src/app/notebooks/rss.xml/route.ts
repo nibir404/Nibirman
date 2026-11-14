@@ -6,7 +6,7 @@ export const dynamic = "force-static";
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 export function GET() {
-  const site = process.env.NEXT_PUBLIC_SITE_URL ?? "https://nibirman.vercel.app";
+  const site = process.env.NEXT_PUBLIC_SITE_URL ?? "https://nibirimtiaz.me";
   const items = getFolios()
     .map(
       (f) => `<item><title>${esc(`${f.title} ${f.titleItalic ?? ""}`.trim())}</title><link>${site}/notebooks/${f.slug}</link><guid>${site}/notebooks/${f.slug}</guid><pubDate>${new Date(f.date).toUTCString()}</pubDate><description>${esc(f.dek)}</description></item>`,

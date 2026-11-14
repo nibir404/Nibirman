@@ -112,7 +112,7 @@ Open <http://localhost:3000>. Add `?time=night` (or `dawn`, `day`, `dusk`) to pr
   - **Engravings** live in `public/art/`. They were drawn from those photos in Paper (page *v7*, frame *00 · Engraved assets*) and are marked `art: true`, so the shader re-inks them in the current act's colours.
   - **To add an image,** drop the file in, add a key, and use it with `<MachineImage photo="key" mode="…" />`.
 - **Contact delivery:** by default the wax seal opens the visitor's mail app with the letter filled in. To receive letters directly, set `NEXT_PUBLIC_FORM_ENDPOINT` to a form service URL such as Formspree. The form posts JSON to it.
-- **Site URL:** set `NEXT_PUBLIC_SITE_URL` (currently `https://nibirman.vercel.app`) so the RSS feed and social preview images use absolute links.
+- **Site URL:** set `NEXT_PUBLIC_SITE_URL` (currently `https://nibirimtiaz.me`) so the RSS feed and social preview images use absolute links.
 
 ## Writing a Notebook post
 
@@ -172,7 +172,7 @@ src/
 
 ## Deployment
 
-Live at **https://nibirman.vercel.app**. The Vercel project `nibirman` is connected to this GitHub repo:
+Live at **https://nibirimtiaz.me**. The Vercel project `nibirman` is connected to this GitHub repo:
 
 - **Production:** every push to `main` deploys automatically.
 - **Previews:** every other branch and every pull request gets its own preview URL.

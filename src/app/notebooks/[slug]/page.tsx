@@ -26,7 +26,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
   if (i < 0) notFound();
   const f = all[i];
   const prev = all[i + 1];
-  const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://nibirman.vercel.app"}/notebooks/${f.slug}`;
+  const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://nibirimtiaz.me"}/notebooks/${f.slug}`;
 
   return (
     <>

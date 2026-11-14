@@ -51,7 +51,7 @@ export default function CaseStudy({ index }: { index: number }) {
     <div ref={root}>
       <header className="cs-hero relative h-[96svh] overflow-hidden bg-ink">
         <div className="cs-hero-img absolute inset-0">
-          <MachineImage src={w.img} alt={`${w.name} — painted plate`} mode="pixel" cell={48} progressRef={reveal} className="h-full w-full" />
+          <MachineImage photo={w.img} mode="pixel" cell={48} progressRef={reveal} className="h-full w-full" />
         </div>
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,14,40,0.6)_0%,transparent_22%,transparent_45%,rgba(10,14,40,0.85)_100%)]" />
         <div className="absolute inset-x-5 bottom-28 flex flex-wrap items-end justify-between gap-6 text-[#f8f3e7] md:inset-x-10">
@@ -145,7 +145,7 @@ export default function CaseStudy({ index }: { index: number }) {
               </p>
             </div>
             <div className="hidden w-52 rotate-3 border border-ink bg-card p-2 md:block">
-              <MachineImage src={next.img} alt="" mode="dither" className="aspect-[4/3]" />
+              <MachineImage photo={next.img} alt="" mode="dither" progress={0} className="aspect-[4/3]" />
             </div>
           </Link>
         </div>

@@ -67,7 +67,7 @@ export default function Works() {
         transition={{ duration: 0.3 }}
       >
         {hover !== null && (
-          <MachineImage key={works[hover].slug} src={works[hover].img} alt="" mode="pixel" cell={36} progressRef={progress} className="h-full w-full" />
+          <MachineImage key={works[hover].slug} photo={works[hover].img} alt="" mode="pixel" cell={36} progressRef={progress} className="h-full w-full" />
         )}
       </motion.div>
     </Sheet>

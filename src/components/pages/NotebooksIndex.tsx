@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import MachineImage from "@/components/gl/MachineImage";
 import Footer from "@/components/Footer";
-import { roman } from "@/lib/career";
+import { photos, roman, type PhotoKey } from "@/lib/career";
 import type { Folio } from "@/lib/notebooks";
 
 type Meta = Omit<Folio, "html">;
@@ -59,7 +59,7 @@ export default function NotebooksIndex({ folios }: { folios: Meta[] }) {
           >
             <div className="border border-ink bg-card p-2.5">
               {featured.cover ? (
-                <MachineImage src={featured.cover} alt="" mode="dither" progress={hover ? 1 : 0.85} className="aspect-[4/3]" position="50% 25%" />
+                <MachineImage photo={featured.cover in photos ? (featured.cover as PhotoKey) : "studio"} alt="" mode="dither" progress={hover ? 1 : 0} className="aspect-[4/3]" />
               ) : (
                 <div className="hatch aspect-[4/3]" />
               )}

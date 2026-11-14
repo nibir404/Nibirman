@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef } from "react";
-import Image from "next/image";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -22,7 +21,7 @@ export default function Evolution() {
   useGSAP(
     () => {
       gsap.from(".ev-title", { yPercent: 40, opacity: 0, duration: 1.4, ease: "expo.out", delay: 0.1 });
-      gsap.to(".ev-opener img", { yPercent: 12, ease: "none", scrollTrigger: { trigger: ".ev-opener", start: "top top", end: "bottom top", scrub: true } });
+      gsap.to(".ev-opener canvas", { yPercent: 12, ease: "none", scrollTrigger: { trigger: ".ev-opener", start: "top top", end: "bottom top", scrub: true } });
       gsap.fromTo(".spine-fill", { scaleY: 0 }, { scaleY: 1, ease: "none", scrollTrigger: { trigger: ".acts", start: "top 60%", end: "bottom 60%", scrub: true } });
       gsap.utils.toArray<HTMLElement>(".act").forEach((act) => {
         gsap.from(act.querySelector(".plate"), {
@@ -51,9 +50,9 @@ export default function Evolution() {
   return (
     <div ref={root}>
       <header className="ev-opener relative h-[92svh] overflow-hidden">
-        <Image src="/paintings/teacher.jpg" alt="" fill priority sizes="100vw" className="object-cover" style={{ filter: "brightness(0.55) saturate(0.85)" }} />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(21,17,13,0.5)_0%,rgba(21,17,13,0.1)_40%,transparent_70%)]" />
-        <div className="absolute inset-x-0 top-[18svh] flex flex-col items-center gap-2 text-center text-[#f1e6cc]">
+        <MachineImage photo="studio" alt="" mode="dither" progress={0} className="absolute inset-0" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,color-mix(in_oklab,var(--paper)_85%,transparent)_0%,color-mix(in_oklab,var(--paper)_40%,transparent)_45%,transparent_75%)]" />
+        <div className="absolute inset-x-0 top-[18svh] flex flex-col items-center gap-2 text-center text-ink">
           <p className="font-serif text-2xl tracking-[0.12em]">I — V</p>
           <h1 className="ev-title font-serif text-[22vw] serif-tight md:text-[17vw]">Evolution</h1>
           <p className="mt-4 font-serif text-2xl italic leading-snug md:text-3xl">
@@ -74,9 +73,7 @@ export default function Evolution() {
           <article key={a.n} className="act relative grid items-center gap-10 pl-8 md:grid-cols-[1fr_1fr] md:gap-28 md:pl-0">
             <div className="relative">
               <div className="plate border border-ink bg-card p-3">
-                <div className="relative aspect-[4/5]">
-                  <Image src={a.img} alt={`${a.title.join(" ")} — ${a.caption}`} fill sizes="(min-width:768px) 40vw, 90vw" className="object-cover" />
-                </div>
+                <MachineImage photo={a.img} mode="engrave" alt={`${a.title.join(" ")} — ${a.caption}`} className="aspect-[4/5]" focus={[0.5, 0.2 + i * 0.12]} />
               </div>
               <p className="label mt-3 text-muted">{a.caption}</p>
               {i === acts.length - 1 && (
@@ -85,7 +82,7 @@ export default function Evolution() {
                     <span>Agent&apos;s view</span>
                     <span>● live</span>
                   </div>
-                  <MachineImage src="/paintings/philosopher.jpg" alt="Imtiaz as the agents see him, in ASCII" mode="ascii" className="aspect-[4/5]" />
+                  <MachineImage photo="studio" alt="Imtiaz as the agents see him, in ASCII" mode="ascii" progress={0} className="aspect-[4/5]" />
                 </div>
               )}
             </div>

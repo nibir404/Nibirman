@@ -5,7 +5,7 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
-import OilInkPortrait from "@/components/gl/OilInkPortrait";
+import SeamPortrait from "@/components/gl/SeamPortrait";
 import { profile } from "@/lib/career";
 
 gsap.registerPlugin(ScrollTrigger, SplitText, useGSAP);
@@ -60,21 +60,21 @@ export default function Hero() {
 
   return (
     <section id="top" ref={root} className="relative h-svh overflow-hidden">
-      <p className="hero-fade label absolute inset-x-0 top-[13svh] text-center text-muted">Oil · pixel · ink — drag the seam</p>
+      <p className="hero-fade label absolute inset-x-0 top-[13svh] text-center text-muted">Pixel · engraving — drag the seam</p>
 
       {/* the arch */}
       <div className="arch absolute left-1/2 top-[16svh] h-[52svh] w-[min(64vw,33svh)] -translate-x-1/2 origin-bottom">
         <div className="absolute -inset-3 rounded-t-full border border-ink" />
-        <OilInkPortrait className="h-full w-full rounded-t-full" />
+        <SeamPortrait photo="studio" className="h-full w-full rounded-t-full" />
       </div>
 
       <div className="hero-fade absolute top-[42svh] hidden text-right lg:block" style={{ right: "calc(50% + min(32vw, 16.5svh) + 2.5rem)" }}>
-        <p className="font-serif text-2xl italic">in oil</p>
-        <p className="label text-muted">The philosopher</p>
+        <p className="font-serif text-2xl italic">in pixels</p>
+        <p className="label text-muted">How the machine sees</p>
       </div>
       <div className="hero-fade absolute top-[42svh] hidden lg:block" style={{ left: "calc(50% + min(32vw, 16.5svh) + 2.5rem)" }}>
         <p className="font-serif text-2xl italic">in ink</p>
-        <p className="label text-muted">The manga hero</p>
+        <p className="label text-muted">How the engraver sees</p>
       </div>
 
       {/* rule + title on the ground line */}

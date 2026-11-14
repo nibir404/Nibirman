@@ -17,17 +17,31 @@ float luma(vec3 c){ return dot(c, vec3(0.299, 0.587, 0.114)); }
 float bayer2(vec2 a){ a = floor(a); return fract(dot(a, vec2(0.5, a.y * 0.75))); }
 float bayer4(vec2 a){ return bayer2(0.5 * a) * 0.25 + bayer2(a); }
 
-// cover-fit a texture of aspect texA into the canvas
+// cover-fit a texture of aspect texA into the canvas; uFocus = which point of the photo stays in frame
+uniform vec2 uFocus;
 vec2 cover(vec2 uv, float texA){
   float canA = uRes.x / uRes.y;
   vec2 s = canA > texA ? vec2(1.0, texA / canA) : vec2(canA / texA, 1.0);
-  return (uv - 0.5) * s + 0.5;
+  vec2 c = clamp(uFocus, s * 0.5, 1.0 - s * 0.5);
+  return (uv - 0.5) * s + c;
+}
+
+// tone curve for real photos: lift shadows a touch, keep contrast
+float tone(float l){ return smoothstep(0.03, 0.92, pow(l, 0.85)); }
+
+// engraved line-screen: parallel lines that thicken in the shadows (copper-plate look)
+vec3 engraveCol(float l, vec2 px){
+  float wob = sin(px.y * 0.045) * 2.0 + sin(px.x * 0.013) * 3.0;
+  float d = fract((px.x * 0.28 + px.y * 0.96 + wob) / 4.2);   // ~4px pitch, steep angle
+  float w = (1.0 - l) * 0.95;                                    // line width from darkness
+  float a = smoothstep(w + 0.12, w - 0.12, abs(d - 0.5) * 2.0);
+  return mix(uPaper, uInk, a);
 }`;
 
 /**
- * Machine passes on one image.
- * uMode: 0 = pixelate, 1 = Bayer dither, 2 = ASCII, 3 = resolve (ASCII → dither → oil by uProgress)
- * uProgress: 0 → fully "machine", 1 → original oil (for modes 0–2 it blends back to oil)
+ * Machine passes on one photo. Everything ends as a cobalt engraving (no colour photos on the site).
+ * uMode: 0 = pixelate, 1 = Bayer dither, 2 = ASCII, 3 = resolve (ASCII → dither → engraving), 4 = engraving
+ * uProgress: 0 → the machine pass, 1 → the engraving
  */
 export const machineFrag = /* glsl */ `
 ${common}
@@ -38,21 +52,19 @@ uniform float uMode;
 uniform float uProgress;
 uniform float uCell;        // pixel cell (mode 0) in px
 
-vec3 oilAt(vec2 uv){
-  vec4 c = texture2D(uTex, cover(uv, uTexA));
-  return mix(uPaper, c.rgb, c.a);
-}
+float lumAt(vec2 uv){ return tone(luma(texture2D(uTex, cover(uv, uTexA)).rgb)); }
+
+vec3 engrave(vec2 uv){ return engraveCol(lumAt(uv), uv * uRes); }
 
 vec3 pixelate(vec2 uv, float cell){
   vec2 px = uv * uRes;
   vec2 q = (floor(px / cell) + 0.5) * cell / uRes;
-  return oilAt(q);
+  return mix(uInk, uPaper, lumAt(q));
 }
 
 vec3 dither(vec2 uv){
   vec2 px = floor(uv * uRes / 3.0);                 // 3px dither dots
-  vec3 c = oilAt((px + 0.5) * 3.0 / uRes);
-  float l = luma(c);
+  float l = lumAt((px + 0.5) * 3.0 / uRes);
   return l > bayer4(px) ? uPaper : uInk;
 }
 
@@ -60,8 +72,8 @@ vec3 ascii(vec2 uv){
   vec2 cell = vec2(8.0, 14.0);
   vec2 px = uv * uRes;
   vec2 id = floor(px / cell);
-  vec3 c = oilAt((id + 0.5) * cell / uRes);
-  float g = floor((1.0 - luma(c)) * 9.99);          // dark → dense glyph
+  float l = lumAt((id + 0.5) * cell / uRes);
+  float g = floor((1.0 - l) * 9.99);                // dark → dense glyph
   vec2 f = fract(px / cell);
   float m = texture2D(uAtlas, vec2((g + f.x) / 10.0, f.y)).r;
   return mix(uPaper, uInk, m);
@@ -69,68 +81,48 @@ vec3 ascii(vec2 uv){
 
 void main(){
   vec2 uv = vUv;
-  vec3 oil = oilAt(uv);
+  vec3 eng = engrave(uv);
   vec3 col;
   if (uMode < 0.5) {
     float cell = mix(uCell, 1.0, uProgress);
-    col = pixelate(uv, max(cell, 1.0));
+    col = cell > 1.5 ? pixelate(uv, cell) : eng;
   } else if (uMode < 1.5) {
-    col = mix(dither(uv), oil, smoothstep(0.0, 1.0, uProgress));
+    col = mix(dither(uv), eng, smoothstep(0.0, 1.0, uProgress));
   } else if (uMode < 2.5) {
-    col = mix(ascii(uv), oil, smoothstep(0.0, 1.0, uProgress));
-  } else {
-    // resolve: 0–.35 ascii, .35–.75 dither, .75–1 oil
+    col = mix(ascii(uv), eng, smoothstep(0.0, 1.0, uProgress));
+  } else if (uMode < 3.5) {
     float a = smoothstep(0.30, 0.42, uProgress);
     float b = smoothstep(0.70, 0.95, uProgress);
-    col = mix(mix(ascii(uv), dither(uv), a), oil, b);
+    col = mix(mix(ascii(uv), dither(uv), a), eng, b);
+  } else {
+    col = eng;
   }
   gl_FragColor = vec4(col, 1.0);
 }`;
 
 /**
- * Hero: oil | dither band | manga ink, split at uSeam (0..1 across the arch).
- * Both figures are the same pose, so the seam lines up perfectly.
+ * Hero: one photo, split by a draggable seam — Bayer dither on the left, engraving on the right,
+ * a hairline between (exactly the cobalt print from the design).
  */
-export const oilInkFrag = /* glsl */ `
+export const seamFrag = /* glsl */ `
 ${common}
-uniform sampler2D uOil;   // painted figure, transparent bg
-uniform sampler2D uInkT;  // manga twin, transparent bg
-uniform sampler2D uSky;   // full painting for the soft sky
+uniform sampler2D uTex;
 uniform float uTexA;
 uniform float uSeam;
-uniform float uBand;      // px
 uniform float uTime;
-
-vec3 sky(vec2 uv){
-  vec2 s = cover(uv, uTexA);
-  vec3 acc = vec3(0.0);
-  for (int i = 0; i < 9; i++) {
-    vec2 o = vec2(mod(float(i), 3.0) - 1.0, floor(float(i) / 3.0) - 1.0) * 0.018;
-    acc += texture2D(uSky, s + o, 3.0).rgb;
-  }
-  return acc / 9.0;
-}
 
 void main(){
   vec2 uv = vUv;
-  vec2 tuv = cover(uv, uTexA);
-  vec4 o = texture2D(uOil, tuv);
-  vec3 oil = mix(sky(uv), o.rgb, o.a);
-
-  vec4 k = texture2D(uInkT, tuv);
-  float kl = luma(mix(vec3(1.0), k.rgb, k.a));
-  vec3 ink = mix(uInk, uPaper, smoothstep(0.15, 0.85, kl));
-
-  vec2 px = floor(uv * uRes / 3.0);
-  vec3 dc = mix(uPaper, o.rgb, o.a);
-  vec3 dith = luma(dc) > bayer4(px + floor(uTime * 6.0)) ? uPaper : uInk;
-
-  float x = uv.x * uRes.x;
-  float s = uSeam * uRes.x;
-  float h = uBand * 0.5;
-  vec3 col = x < s - h ? oil : (x > s + h ? ink : dith);
-  // hairlines at the band edges
-  float edge = min(abs(x - (s - h)), abs(x - (s + h)));
-  col = mix(uInk, col, smoothstep(0.0, 1.2, edge));
+  vec2 px = uv * uRes;
+  float x = px.x, s = uSeam * uRes.x;
+  vec3 col;
+  if (x < s) {
+    vec2 c = floor(px / 3.0);
+    float l = tone(luma(texture2D(uTex, cover((c + 0.5) * 3.0 / uRes, uTexA)).rgb));
+    col = l > bayer4(c) ? uPaper : uInk;
+  } else {
+    col = engraveCol(tone(luma(texture2D(uTex, cover(uv, uTexA)).rgb)), px);
+  }
+  col = mix(uInk, col, smoothstep(0.0, 1.4, abs(x - s)));
   gl_FragColor = vec4(col, 1.0);
 }`;

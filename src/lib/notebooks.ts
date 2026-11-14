@@ -13,7 +13,7 @@ import { marked } from "marked";
  * dek: "One-sentence standfirst."
  * date: "2026-11-14"
  * topic: "Agents"                        # Agents | Product | Craft (any string works)
- * cover: "/paintings/forge.jpg"          # optional
+ * cover: "studio"                       # optional: a photo key from src/lib/career.ts
  * coverCaption: "The forge of automatons, oil on linen"
  * draft: false                           # true hides it in production
  * ---

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import MachineImage from "@/components/gl/MachineImage";
 import { scrollState } from "@/components/SmoothScroll";
+import { photos, type PhotoKey } from "@/lib/career";
 
 /** Reading-progress rule + the folio's header and plate (the plate loads as a dither, then resolves to oil). */
 export default function FolioChrome({ cover, caption, minutes, children }: { cover?: string; caption?: string; minutes: number; children: React.ReactNode }) {
@@ -36,7 +37,7 @@ export default function FolioChrome({ cover, caption, minutes, children }: { cov
         {cover && (
           <figure className="w-full max-w-6xl">
             <div className="border border-ink bg-card p-3">
-              <MachineImage src={cover} alt={caption ?? ""} mode="dither" progressRef={resolve} className="aspect-[2.1/1]" position="50% 25%" />
+              <MachineImage photo={cover in photos ? (cover as PhotoKey) : "studio"} alt={caption ?? ""} mode="dither" progressRef={resolve} className="aspect-[2.1/1]" />
             </div>
             {caption && <figcaption className="label mt-3 text-muted">Plate · {caption}</figcaption>}
           </figure>

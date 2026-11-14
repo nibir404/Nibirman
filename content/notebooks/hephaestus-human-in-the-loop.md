@@ -4,8 +4,8 @@ titleItalic: "human in the loop."
 dek: "The oldest story about automatons is a product spec: the god builds the helpers, and still decides what leaves the forge."
 date: "2026-11-14"
 topic: "Agents"
-cover: "/paintings/forge.jpg"
-coverCaption: "The forge of automatons, oil on linen — after Caravaggio"
+cover: "studio"
+coverCaption: "Engraving after a photograph"
 ---
 
 Homer gives Hephaestus helpers of gold: they walk, they speak, they know the craft. And yet nothing in the forge is finished until the god looks at it. That is the whole design brief for an agentic product, written three thousand years early.

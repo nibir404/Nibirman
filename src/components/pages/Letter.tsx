@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
+import MachineImage from "@/components/gl/MachineImage";
 import { AnimatePresence, motion } from "framer-motion";
 import { profile } from "@/lib/career";
 import { dhakaClock } from "@/lib/time";
@@ -72,7 +72,7 @@ export default function Letter() {
           </p>
         </div>
         <div className="relative hidden h-72 w-56 overflow-hidden rounded-t-full border border-accent lg:block">
-          <Image src="/paintings/philosopher.jpg" alt="" fill sizes="224px" className="object-cover object-top" />
+          <MachineImage photo="houndstooth" mode="engrave" className="h-full w-full" />
         </div>
       </div>
 

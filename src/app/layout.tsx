@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "The Agentic Renaissance — Imtiaz Ahmed",
     description: "A career told as a commission of paintings, lit by the real time in Dhaka.",
-    images: ["/paintings/philosopher.jpg"],
+    images: ["/photos/imtiaz-studio.jpg"],
   },
   alternates: { types: { "application/rss+xml": "/notebooks/rss.xml" } },
 };

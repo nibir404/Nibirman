@@ -185,6 +185,31 @@ npx vercel
 
 Set `NEXT_PUBLIC_SITE_URL`, and optionally `NEXT_PUBLIC_FORM_ENDPOINT`, in the project's environment variables.
 
+## CI/CD
+
+| Stage | Where | What runs |
+|-------|-------|-----------|
+| **CI** | GitHub Actions, `.github/workflows/ci.yml` | `npm ci` → lint → type-check → production build, on every push and pull request |
+| **Preview** | Vercel | Every pull request and branch gets its own preview URL |
+| **Production** | Vercel | Every push to `main` deploys to **https://nibirimtiaz.me** |
+| **Release** | GitHub Actions, `.github/workflows/release.yml` | Pushing a `vX.Y.Z` tag publishes a GitHub Release from that version's CHANGELOG section |
+| **Dependencies** | Dependabot | Weekly npm updates (minor and patch grouped), monthly Actions updates |
+
+**Branch protection on `main`:** the CI check must pass before a pull request can merge.
+
+**The workflow:**
+1. Branch off `main` and open a pull request. CI runs and Vercel posts a preview.
+2. When CI passes, merge the pull request. Production deploys automatically.
+3. To cut a release:
+
+```bash
+npm version minor -m "chore(release): v%s"
+```
+
+```bash
+git push --follow-tags
+```
+
 ## Versioning & releases
 
 The project follows [Semantic Versioning](https://semver.org) and [Conventional Commits](https://www.conventionalcommits.org). Every release is tagged and recorded in [`CHANGELOG.md`](./CHANGELOG.md).

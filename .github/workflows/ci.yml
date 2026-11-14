@@ -1,0 +1,39 @@
+name: CI
+
+# Lint, type-check and build on every push and pull request.
+# Deployment is handled by Vercel's GitHub integration:
+#   - pull requests / branches → preview deployments
+#   - main                      → production (nibirimtiaz.me)
+# Branch protection on `main` requires this workflow to pass before a PR can merge.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Lint · Typecheck · Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_TELEMETRY_DISABLED: 1
+      NEXT_PUBLIC_SITE_URL: https://nibirimtiaz.me
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run build

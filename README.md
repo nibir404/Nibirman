@@ -172,7 +172,12 @@ src/
 
 ## Deployment
 
-The site is fully static, so **Vercel** is the easiest host:
+Live at **https://nibirman.vercel.app**. The Vercel project `nibirman` is connected to this GitHub repo:
+
+- **Production:** every push to `main` deploys automatically.
+- **Previews:** every other branch and every pull request gets its own preview URL.
+
+To deploy by hand from your machine:
 
 ```bash
 npx vercel

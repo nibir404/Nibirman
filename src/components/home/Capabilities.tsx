@@ -28,7 +28,7 @@ export default function Capabilities() {
           </h2>
           <div className="mt-10 flex-1 md:mt-auto" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} data-cursor="Look">
             <MachineImage
-              photo="houndstooth"
+              photo="portraitHoundstooth"
               mode="dither"
               progress={hover ? 0 : 1}
               className="aspect-[4/3] w-full md:aspect-auto md:h-[46svh]"

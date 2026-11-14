@@ -58,7 +58,7 @@ export default function Preloader() {
           transition={{ duration: 0.9, ease: [0.7, 0, 0.2, 1] }}
         >
           <div className="relative h-[58svh] w-[min(76vw,37svh)] overflow-hidden rounded-t-full border border-ink">
-            <MachineImage photo="studio" alt="" mode="resolve" progressRef={progress} className="h-full w-full" />
+            <MachineImage photo="portraitStudio" alt="" mode="resolve" progressRef={progress} className="h-full w-full" />
           </div>
           <div className="flex w-[min(76vw,37svh)] justify-between font-mono text-[11px] uppercase tracking-[0.2em]">
             <span>{stage}</span>

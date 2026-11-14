@@ -72,7 +72,7 @@ export default function Letter() {
           </p>
         </div>
         <div className="relative hidden h-72 w-56 overflow-hidden rounded-t-full border border-accent lg:block">
-          <MachineImage photo="houndstooth" mode="engrave" className="h-full w-full" />
+          <MachineImage photo="portraitHoundstooth" mode="engrave" className="h-full w-full" />
         </div>
       </div>
 

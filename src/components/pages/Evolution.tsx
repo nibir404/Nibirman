@@ -50,8 +50,8 @@ export default function Evolution() {
   return (
     <div ref={root}>
       <header className="ev-opener relative h-[92svh] overflow-hidden">
-        <MachineImage photo="studio" alt="" mode="dither" progress={0} className="absolute inset-0" />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,color-mix(in_oklab,var(--paper)_85%,transparent)_0%,color-mix(in_oklab,var(--paper)_40%,transparent)_45%,transparent_75%)]" />
+        <div className="absolute inset-0"><MachineImage photo="teacher" alt="" mode="dither" progress={0.15} className="h-full w-full" /></div>
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,color-mix(in_oklab,var(--paper)_94%,transparent)_0%,color-mix(in_oklab,var(--paper)_85%,transparent)_45%,transparent_82%)]" />
         <div className="absolute inset-x-0 top-[18svh] flex flex-col items-center gap-2 text-center text-ink">
           <p className="font-serif text-2xl tracking-[0.12em]">I — V</p>
           <h1 className="ev-title font-serif text-[22vw] serif-tight md:text-[17vw]">Evolution</h1>

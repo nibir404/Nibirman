@@ -4,7 +4,7 @@ titleItalic: "human in the loop."
 dek: "The oldest story about automatons is a product spec: the god builds the helpers, and still decides what leaves the forge."
 date: "2026-11-14"
 topic: "Agents"
-cover: "studio"
+cover: "maker"
 coverCaption: "Engraving after a photograph"
 ---
 

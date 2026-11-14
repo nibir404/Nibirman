@@ -11,14 +11,15 @@ A full redesign: **The Agentic Renaissance**, built from the Paper design *v7*.
 
 ### Added
 - **Dhaka-clock theming:** four palettes (dawn, day, dusk, night) chosen by the real time in Asia/Dhaka, a switch in the masthead to preview the others, `?time=` links, and an inline boot script so there's no colour flash on load.
-- **Live WebGL shaders** (raw Three.js) that show the machine's view of the paintings: Pixelate, Bayer dither, ASCII (from a canvas glyph atlas), Resolve (ASCII → dither → oil), and the hero's Oil ⇄ Ink split with a draggable seam and a dither band.
+- **Live WebGL shaders** (raw Three.js): Pixelate, Bayer dither, ASCII (from a canvas glyph atlas), engraving line-screen, Resolve (ASCII → dither → engraving), and the hero seam (dither ⇄ engraving) that you drag.
 - **Home**, with scroll choreography modelled on Shopify Editions: a preloader; a pinned hero whose title flies into a fixed chapter index; a portal into Act II; a pinned train journey with an engraved parallax landscape and platform boards; torn-paper sheets that stack over one another (Capabilities, Works, Commission).
 - **/evolution:** the five-act timeline with a self-drawing spine and Act V's live ASCII "agent's view".
 - **/works/[slug]:** five case studies with a pixel-to-oil hero, a fixed section index, a decision ledger and a link to the next plate.
 - **/notebooks**, **/notebooks/[slug]** and **/notebooks/rss.xml:** a markdown blog (gray-matter + marked) with a featured folio, topic filters, reading progress and RSS.
 - **/contact:** a fill-in-the-blanks letter with a wax-seal send button (form endpoint or mailto).
 - **/resume:** a 3D printer that prints the CV as a tablet, with a live console and a download at the end.
-- Six AI-generated Renaissance paintings of Imtiaz, plus a matched oil and ink figure pair.
+- Imtiaz's real photos (`public/photos/`) and seven cobalt copper-plate engravings drawn from them in Paper (`public/art/`): two portraits and five act scenes. There is no stock or invented art.
+- A Print pass re-inks the engravings in each act's colours, and lines always print in the darker colour so nothing turns into a negative at night.
 
 ### Changed
 - The typography is now Instrument Serif, Inter Tight and JetBrains Mono, with a cobalt-on-parchment base.

@@ -4,7 +4,7 @@ titleItalic: "designing for one bar of signal"
 dek: "What's the least we can send to get someone on the right bus?"
 date: "2026-10-20"
 topic: "Product"
-cover: "houndstooth"
+cover: "voyager"
 coverCaption: "Engraving after a photograph"
 ---
 

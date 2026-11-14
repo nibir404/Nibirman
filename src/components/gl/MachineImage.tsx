@@ -34,8 +34,8 @@ export default function MachineImage({
   className?: string;
   focus?: [number, number];
 }) {
-  const p = photos[photo];
-  const f = focus ?? p.focus;
+  const p: { src: string; focus: readonly number[]; alt: string; art?: boolean } = photos[photo];
+  const f = focus ?? (p.focus as [number, number]);
   const { palette } = useTime();
   const pal = useRef(palette);
   pal.current = palette;
@@ -55,6 +55,7 @@ export default function MachineImage({
         uMode: { value: modeId[mode] },
         uProgress: { value: eased.current },
         uCell: { value: cell },
+        uArt: { value: p.art ? 1 : 0 },
         uInk: { value: color(palette.ink) },
         uPaper: { value: color(palette.paper) },
       };
@@ -76,7 +77,7 @@ export default function MachineImage({
           src={p.src}
           alt=""
           onError={() => setMissing(true)}
-          className="absolute inset-0 h-full w-full object-cover grayscale transition-opacity duration-500"
+          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${p.art ? "" : "grayscale"}`}
           style={{ objectPosition: `${f[0] * 100}% ${f[1] * 100}%`, opacity: ready ? 0 : 1 }}
         />
       )}

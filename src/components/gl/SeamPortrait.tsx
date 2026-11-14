@@ -12,7 +12,7 @@ import { photos, type PhotoKey } from "@/lib/career";
  * engraving on the right. Drag it, or let it follow the cursor.
  */
 export default function SeamPortrait({ photo = "studio", className = "" }: { photo?: PhotoKey; className?: string }) {
-  const p = photos[photo];
+  const p: { src: string; focus: readonly number[]; alt: string; engraved?: string } = photos[photo];
   const { palette } = useTime();
   const pal = useRef(palette);
   pal.current = palette;
@@ -25,9 +25,15 @@ export default function SeamPortrait({ photo = "studio", className = "" }: { pho
   const { host, ready } = useShaderCanvas(
     seamFrag,
     async () => {
-      const tex = await loadTex(p.src);
+      // both sides use the engraved portrait so the seam lines up perfectly (falls back to the photo)
+      const art = p.engraved ? await loadTex(p.engraved).catch(() => null) : null;
+      const tex = art ?? (await loadTex(p.src));
       const img = tex.image as HTMLImageElement;
+      const aimg = art?.image as HTMLImageElement | undefined;
       return {
+        uArtTex: { value: art ?? tex },
+        uArtA: { value: aimg ? aimg.width / aimg.height : img.width / img.height },
+        uHasArt: { value: art ? 1 : 0 },
         uTex: { value: tex },
         uTexA: { value: img.width / img.height },
         uFocus: { value: new THREE.Vector2(p.focus[0], 1 - p.focus[1]) },
@@ -74,9 +80,9 @@ export default function SeamPortrait({ photo = "studio", className = "" }: { pho
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={p.src}
+        src={p.engraved ?? p.src}
         alt=""
-        className="absolute inset-0 h-full w-full object-cover grayscale transition-opacity duration-700"
+        className="absolute inset-0 h-full w-full object-cover transition-opacity duration-700"
         style={{ objectPosition: `${p.focus[0] * 100}% ${p.focus[1] * 100}%`, opacity: ready ? 0 : 1 }}
       />
       {ready && (

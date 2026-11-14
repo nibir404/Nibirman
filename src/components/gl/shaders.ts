@@ -13,6 +13,11 @@ uniform vec3 uPaper;    // act paper colour
 
 float luma(vec3 c){ return dot(c, vec3(0.299, 0.587, 0.114)); }
 
+// lines always print in the darker colour and paper in the lighter one,
+// so faces never turn into negatives on the dusk/night palettes
+vec3 inkC(){ return luma(uInk) < luma(uPaper) ? uInk : uPaper; }
+vec3 paperC(){ return luma(uInk) < luma(uPaper) ? uPaper : uInk; }
+
 // ordered 4x4 Bayer threshold, 0..1
 float bayer2(vec2 a){ a = floor(a); return fract(dot(a, vec2(0.5, a.y * 0.75))); }
 float bayer4(vec2 a){ return bayer2(0.5 * a) * 0.25 + bayer2(a); }
@@ -35,7 +40,7 @@ vec3 engraveCol(float l, vec2 px){
   float d = fract((px.x * 0.28 + px.y * 0.96 + wob) / 4.2);   // ~4px pitch, steep angle
   float w = (1.0 - l) * 0.95;                                    // line width from darkness
   float a = smoothstep(w + 0.12, w - 0.12, abs(d - 0.5) * 2.0);
-  return mix(uPaper, uInk, a);
+  return mix(paperC(), inkC(), a);
 }`;
 
 /**
@@ -51,21 +56,27 @@ uniform float uTexA;
 uniform float uMode;
 uniform float uProgress;
 uniform float uCell;        // pixel cell (mode 0) in px
+uniform float uArt;         // 1 = source is already an engraved asset → print it, don't re-engrave
 
-float lumAt(vec2 uv){ return tone(luma(texture2D(uTex, cover(uv, uTexA)).rgb)); }
+float rawAt(vec2 uv){ return luma(texture2D(uTex, cover(uv, uTexA)).rgb); }
+float lumAt(vec2 uv){ return uArt > 0.5 ? smoothstep(0.25, 0.9, rawAt(uv)) : tone(rawAt(uv)); }
 
-vec3 engrave(vec2 uv){ return engraveCol(lumAt(uv), uv * uRes); }
+// final state: photos are engraved by the shader; engraved assets are re-inked in the act's colours
+vec3 engrave(vec2 uv){
+  if (uArt > 0.5) return mix(inkC(), paperC(), smoothstep(0.32, 0.86, rawAt(uv)));
+  return engraveCol(lumAt(uv), uv * uRes);
+}
 
 vec3 pixelate(vec2 uv, float cell){
   vec2 px = uv * uRes;
   vec2 q = (floor(px / cell) + 0.5) * cell / uRes;
-  return mix(uInk, uPaper, lumAt(q));
+  return mix(inkC(), paperC(), lumAt(q));
 }
 
 vec3 dither(vec2 uv){
   vec2 px = floor(uv * uRes / 3.0);                 // 3px dither dots
   float l = lumAt((px + 0.5) * 3.0 / uRes);
-  return l > bayer4(px) ? uPaper : uInk;
+  return l > bayer4(px) ? paperC() : inkC();
 }
 
 vec3 ascii(vec2 uv){
@@ -76,7 +87,7 @@ vec3 ascii(vec2 uv){
   float g = floor((1.0 - l) * 9.99);                // dark → dense glyph
   vec2 f = fract(px / cell);
   float m = texture2D(uAtlas, vec2((g + f.x) / 10.0, f.y)).r;
-  return mix(uPaper, uInk, m);
+  return mix(paperC(), inkC(), m);
 }
 
 void main(){
@@ -110,6 +121,9 @@ uniform sampler2D uTex;
 uniform float uTexA;
 uniform float uSeam;
 uniform float uTime;
+uniform sampler2D uArtTex;  // engraved asset of the same photo (right side)
+uniform float uArtA;
+uniform float uHasArt;
 
 void main(){
   vec2 uv = vUv;
@@ -119,10 +133,13 @@ void main(){
   if (x < s) {
     vec2 c = floor(px / 3.0);
     float l = tone(luma(texture2D(uTex, cover((c + 0.5) * 3.0 / uRes, uTexA)).rgb));
-    col = l > bayer4(c) ? uPaper : uInk;
+    col = l > bayer4(c) ? paperC() : inkC();
+  } else if (uHasArt > 0.5) {
+    float l = luma(texture2D(uArtTex, cover(uv, uArtA)).rgb);
+    col = mix(inkC(), paperC(), smoothstep(0.32, 0.86, l));
   } else {
     col = engraveCol(tone(luma(texture2D(uTex, cover(uv, uTexA)).rgb)), px);
   }
-  col = mix(uInk, col, smoothstep(0.0, 1.4, abs(x - s)));
+  col = mix(inkC(), col, smoothstep(0.0, 1.4, abs(x - s)));
   gl_FragColor = vec4(col, 1.0);
 }`;

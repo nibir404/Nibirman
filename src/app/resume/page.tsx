@@ -1,11 +1,5 @@
 import type { Metadata } from "next";
-import Printer from "@/components/pages/Printer";
+import { Resume } from "@/components/pages/People";
 
-export const metadata: Metadata = {
-  title: "Print my résumé",
-  description: "Download Imtiaz Ahmed's résumé — printed layer by layer.",
-};
-
-export default function Page() {
-  return <Printer />;
-}
+export const metadata: Metadata = { title: "Résumé", description: "Print-ready résumé of Imtiaz Ahmed, AI Product Architect." };
+export default function Page() { return <Resume />; }

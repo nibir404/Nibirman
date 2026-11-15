@@ -1,108 +1,106 @@
 "use client";
 
 import { useRef } from "react";
+import Link from "next/link";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { SplitText } from "gsap/SplitText";
-import SeamPortrait from "@/components/gl/SeamPortrait";
-import { profile } from "@/lib/career";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { useTime } from "../TimeProvider";
+import { Magnetic, TitleBar } from "../fx";
 
-gsap.registerPlugin(ScrollTrigger, SplitText, useGSAP);
+function Seal() {
+  return (
+    <svg viewBox="-100 -100 200 200" className="h-full w-full" aria-hidden>
+      <circle r="96" fill="var(--bg)" stroke="var(--ink)" strokeWidth="1.5" />
+      <circle r="70" fill="none" stroke="var(--ink)" strokeWidth="1" strokeDasharray="3 4" />
+      <path id="seal-arc" d="M-82 0 A82 82 0 1 1 82 0 A82 82 0 1 1 -82 0" fill="none" />
+      <text fontFamily="var(--f-mono)" fontSize="14" letterSpacing="4" fill="var(--ink)"><textPath href="#seal-arc">MADE IN DHAKA · BANGLADESH · </textPath></text>
+      <g fill="none" stroke="var(--ink)" strokeWidth="2.4">
+        {[0, 45, 90, 135, 180, 225, 270, 315].map((r) => <path key={r} d="M0 0 C9 -14 9 -34 0 -48 C-9 -34 -9 -14 0 0Z" transform={`rotate(${r})`} />)}
+      </g>
+      <circle r="9" fill="var(--accent)" />
+    </svg>
+  );
+}
 
-/**
- * Prologue (Shopify Editions–style choreography):
- * pinned → the title flies into the top-left chapter index → the arch swells →
- * a portal opens from the oil/ink seam and swallows the screen → Act II.
- */
 export default function Hero() {
   const root = useRef<HTMLElement>(null);
+  const { art, edition, palette } = useTime();
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const sx = useSpring(mx, { stiffness: 60, damping: 18 });
+  const sy = useSpring(my, { stiffness: 60, damping: 18 });
+  const back = { x: useTransform(sx, (v) => v * -18), y: useTransform(sy, (v) => v * -10) };
+  const mid = { x: useTransform(sx, (v) => v * 10), y: useTransform(sy, (v) => v * 6) };
+  const front = { x: useTransform(sx, (v) => v * 30), y: useTransform(sy, (v) => v * 16) };
+  const rotY = useTransform(sx, (v) => v * 6);
+  const rotX = useTransform(sy, (v) => v * -4);
 
   useGSAP(
     () => {
-      const split = SplitText.create(".hero-word", { type: "chars", mask: "lines" });
-      gsap.from(split.chars, { yPercent: 110, duration: 1.3, ease: "expo.out", stagger: 0.03, delay: 0.15 });
-      gsap.from(".hero-fade", { opacity: 0, y: 16, duration: 1, delay: 0.9, stagger: 0.1 });
-      gsap.from(".arch", { clipPath: "inset(100% 0 0 0 round 999px 999px 0 0)", duration: 1.6, ease: "expo.inOut" });
-
       const mm = gsap.matchMedia();
       mm.add("(prefers-reduced-motion: no-preference)", () => {
-        const title = root.current!.querySelector<HTMLElement>(".hero-title")!;
-        const target = () => document.getElementById("index-title")?.getBoundingClientRect();
-        const delta = () => {
-          const t = target();
-          const s = title.getBoundingClientRect();
-          if (!t) return { x: 0, y: -400, scale: 0.2 };
-          const scale = t.width / s.width;
-          return { x: t.left - s.left, y: t.top - s.top, scale };
-        };
-
-        const tl = gsap.timeline({
-          scrollTrigger: { trigger: root.current, start: "top top", end: "+=260%", scrub: 1, pin: true, invalidateOnRefresh: true },
-        });
-        tl.to(".hero-fade", { opacity: 0, duration: 0.15 }, 0)
-          .to(title, { x: () => delta().x, y: () => delta().y, scale: () => delta().scale, transformOrigin: "0 0", ease: "power2.inOut", duration: 0.35 }, 0)
-          .to(title, { opacity: 0, duration: 0.05 }, 0.33)
-          .to(document.getElementById("chapter-index"), { autoAlpha: 1, x: 0, duration: 0.08 }, 0.3)
-          .to(".rule", { scaleX: 0, duration: 0.2 }, 0.05)
-          .to(".arch", { scale: 1.18, y: "6vh", ease: "power1.inOut", duration: 0.4 }, 0.05)
-          .fromTo(
-            ".portal",
-            { clipPath: "circle(0% at 50% 62%)" },
-            { clipPath: "circle(150% at 50% 62%)", ease: "power2.in", duration: 0.5 },
-            0.45,
-          )
-          .from(".portal-copy > *", { y: 40, opacity: 0, stagger: 0.04, duration: 0.15 }, 0.75);
+        const intro = gsap.timeline({ defaults: { ease: "expo.out" } });
+        intro
+          .from(".h-arch", { clipPath: "inset(100% 0 0 0)", duration: 1.6, ease: "expo.inOut" })
+          .from(".h-back", { yPercent: 40, opacity: 0, duration: 1.4 }, 0.3)
+          .from(".h-front", { yPercent: 40, opacity: 0, duration: 1.4 }, 0.45)
+          .from(".h-band", { scaleX: 0, duration: 1, ease: "power4.inOut" }, 0.9)
+          .from(".h-meta", { opacity: 0, y: 16, stagger: 0.08, duration: 0.8 }, 1.1);
+        const tl = gsap.timeline({ scrollTrigger: { trigger: root.current, start: "top top", end: "bottom top", scrub: 1 } });
+        tl.to(".h-back", { xPercent: -22, ease: "none" }, 0)
+          .to(".h-front", { xPercent: 18, ease: "none" }, 0)
+          .to(".h-arch-wrap", { scale: 1.12, yPercent: 8, ease: "none" }, 0)
+          .to(".h-band", { scaleX: 1.6, ease: "none" }, 0)
+          .to(".h-seal", { rotation: 140, ease: "none" }, 0);
       });
     },
     { scope: root },
   );
 
   return (
-    <section id="top" ref={root} className="relative h-svh overflow-hidden">
-      <p className="hero-fade label absolute inset-x-0 top-[13svh] text-center text-muted">Pixel · engraving — drag the seam</p>
+    <section
+      ref={root}
+      aria-labelledby="hero-title"
+      className="relative h-[100svh] min-h-[640px] overflow-hidden"
+      onPointerMove={(e) => {
+        mx.set(e.clientX / window.innerWidth - 0.5);
+        my.set(e.clientY / window.innerHeight - 0.5);
+      }}
+    >
+      <h1 id="hero-title" className="sr-only">Imtiaz Ahmed, AI Product Architect — Building what comes next.</h1>
 
-      {/* the arch */}
-      <div className="arch absolute left-1/2 top-[16svh] h-[52svh] w-[min(64vw,33svh)] -translate-x-1/2 origin-bottom">
-        <div className="absolute -inset-3 rounded-t-full border border-ink" />
-        <SeamPortrait photo="studio" className="h-full w-full rounded-t-full" />
-      </div>
+      <motion.p aria-hidden style={back} className="h-back display absolute left-[-1vw] top-[14svh] whitespace-nowrap text-[30vw] leading-[0.85] md:top-[12svh] md:text-[29vw] xl:text-[420px]">
+        Building
+      </motion.p>
 
-      <div className="hero-fade absolute top-[42svh] hidden text-right lg:block" style={{ right: "calc(50% + min(32vw, 16.5svh) + 2.5rem)" }}>
-        <p className="font-serif text-2xl italic">in pixels</p>
-        <p className="label text-muted">How the machine sees</p>
-      </div>
-      <div className="hero-fade absolute top-[42svh] hidden lg:block" style={{ left: "calc(50% + min(32vw, 16.5svh) + 2.5rem)" }}>
-        <p className="font-serif text-2xl italic">in ink</p>
-        <p className="label text-muted">How the engraver sees</p>
-      </div>
-
-      {/* rule + title on the ground line */}
-      <div className="rule absolute inset-x-5 top-[68svh] h-px origin-center bg-ink md:inset-x-10" />
-      <h1 className="hero-title absolute inset-x-0 top-[68svh] flex flex-wrap items-baseline justify-center gap-x-[0.18em] px-4 font-serif text-[13vw] serif-tight md:text-[10.2vw]">
-        <span className="sr-only">{profile.name} — The Agentic Renaissance</span>
-        <span aria-hidden className="hero-word">The Agentic</span>
-        <span aria-hidden className="hero-word italic">Renaissance</span>
-      </h1>
-
-      <div className="hero-fade absolute bottom-6 left-5 max-w-[22rem] md:bottom-10 md:left-10">
-        <p className="label text-muted">Vol. II — {profile.title}</p>
-        <p className="mt-2 font-serif text-xl leading-snug md:text-2xl">
-          I&apos;m {profile.name}. {profile.promise}
-        </p>
-      </div>
-      <p className="hero-fade label absolute bottom-6 right-5 hidden md:bottom-10 md:right-10 md:block">Scroll to walk through ↓</p>
-
-      {/* the portal into Act II */}
-      <div className="portal absolute inset-0 z-20 flex items-center justify-center bg-ink text-paper [clip-path:circle(0%_at_50%_62%)]">
-        <div className="portal-copy text-center">
-          <p className="label opacity-70">Act II · The journey</p>
-          <p className="mt-4 font-serif text-6xl serif-tight md:text-8xl">
-            Five stations.
-            <br />
-            <em>One line.</em>
-          </p>
+      <motion.div style={{ ...mid, rotateY: rotY, rotateX: rotX, transformPerspective: 1000 }} className="h-arch-wrap absolute left-1/2 top-[24svh] h-[48svh] w-[min(62vw,32svh)] -translate-x-1/2 md:top-[16svh] md:h-[84svh] md:w-[min(36vw,56svh)]">
+        <div aria-hidden className="absolute -inset-3 rounded-t-full border-2 border-dashed border-ink [[data-world=editorial]_&]:block hidden" />
+        <div className="h-arch ui-arch relative h-full w-full bg-ink">
+          <TitleBar title={`engraving_${edition}.bmp`} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={art} alt="Engraving of Imtiaz Ahmed — the image changes every visit" className="h-full w-full object-cover grayscale contrast-125" />
         </div>
+        <div className="h-band absolute left-[-12%] right-[-12%] top-[30%] flex h-10 items-center justify-between bg-accent px-4 text-[var(--on-accent)] md:h-12" aria-hidden>
+          <span className="pixel text-xs md:text-sm">█ █ ▌ ▐</span>
+          <span className="pixel text-xs tracking-[0.08em] md:text-sm">WHAT COMES</span>
+          <span className="pixel text-xs md:text-sm">▐ ▌ █ █</span>
+        </div>
+      </motion.div>
+
+      <motion.p aria-hidden style={front} className="h-front display absolute bottom-[14svh] right-[3vw] text-[30vw] italic leading-[0.85] md:bottom-[-2svh] md:text-[22vw] xl:text-[310px]">
+        next.
+      </motion.p>
+
+      <div className="h-seal absolute right-[5vw] top-[58svh] hidden h-[120px] w-[120px] md:block" aria-hidden>
+        <Seal />
+      </div>
+
+      <div className="absolute bottom-6 left-5 z-10 flex items-center gap-4 md:bottom-10 md:left-10">
+        <Magnetic>
+          <Link href="/work" className="h-meta ui-btn" data-cursor="Enter">Explore my work <span className="ui-dot">→</span></Link>
+        </Magnetic>
+        <span className="h-meta label hidden text-muted lg:block">Independent thinker · Product builder · {palette.name} in Dhaka</span>
       </div>
     </section>
   );

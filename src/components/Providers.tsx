@@ -1,20 +1,23 @@
 "use client";
 
-import SmoothScroll from "./SmoothScroll";
+import { MotionConfig } from "framer-motion";
 import TimeProvider from "./TimeProvider";
-import InkCursor from "./InkCursor";
-import Masthead from "./Masthead";
+import SmoothScroll from "./SmoothScroll";
+import Cursor from "./Cursor";
+import Nav from "./Nav";
+import Footer from "./Footer";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <TimeProvider>
-      <SmoothScroll>
-        <div className="paper-tex">
-          <Masthead />
-          <InkCursor />
-          {children}
-        </div>
-      </SmoothScroll>
-    </TimeProvider>
+    <MotionConfig reducedMotion="user">
+      <TimeProvider>
+        <SmoothScroll>
+          <Cursor />
+          <Nav />
+          <main id="main" tabIndex={-1} className="outline-none">{children}</main>
+          <Footer />
+        </SmoothScroll>
+      </TimeProvider>
+    </MotionConfig>
   );
 }

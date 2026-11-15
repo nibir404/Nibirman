@@ -1,39 +1,36 @@
 import type { Metadata, Viewport } from "next";
-import { Instrument_Serif, Inter_Tight, JetBrains_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Instrument_Serif, Silkscreen, Pixelify_Sans, VT323, Orbitron } from "next/font/google";
 import Providers from "@/components/Providers";
-import { palettes } from "@/lib/time";
 import "./globals.css";
 
-const serif = Instrument_Serif({ weight: "400", style: ["normal", "italic"], subsets: ["latin"], variable: "--nf-serif" });
-const sans = Inter_Tight({ subsets: ["latin"], variable: "--nf-sans" });
-const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--nf-mono" });
+const sans = Geist({ subsets: ["latin"], variable: "--f-sans" });
+const mono = Geist_Mono({ subsets: ["latin"], variable: "--f-mono" });
+const serif = Instrument_Serif({ weight: "400", style: ["normal", "italic"], subsets: ["latin"], variable: "--f-serif" });
+const pixel = Silkscreen({ weight: ["400", "700"], subsets: ["latin"], variable: "--f-pixel" });
+const pixel2 = Pixelify_Sans({ subsets: ["latin"], variable: "--f-pixel2" });
+const vt = VT323({ weight: "400", subsets: ["latin"], variable: "--f-vt" });
+const orbit = Orbitron({ subsets: ["latin"], variable: "--f-orbit" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
-  title: { default: "Imtiaz Ahmed — The Agentic Renaissance", template: "%s · Nibirman" },
-  description: "Agentic Product Manager in Dhaka. I turn AI agents into products people trust. A portfolio lit by the real Dhaka clock.",
-  openGraph: {
-    title: "The Agentic Renaissance — Imtiaz Ahmed",
-    description: "A career told as a commission of paintings, lit by the real time in Dhaka.",
-    images: ["/photos/imtiaz-studio.jpg"],
-  },
-  alternates: { types: { "application/rss+xml": "/notebooks/rss.xml" } },
+  title: { default: "Imtiaz Ahmed — AI Product Architect", template: "%s — Imtiaz Ahmed" },
+  description: "Imtiaz Ahmed is an AI Product Architect working across product strategy, UX research, product design, intelligent systems, and digital product development.",
+  openGraph: { title: "Imtiaz Ahmed — AI Product Architect", description: "Building What Comes Next.", images: ["/art/portrait-studio.jpg"] },
 };
 
-export const viewport: Viewport = { themeColor: "#f8f3e7" };
+export const viewport: Viewport = { themeColor: "#E9E8E3", width: "device-width", initialScale: 1 };
 
-// Runs before first paint: pick the act from the real Dhaka clock so there is no day→night flash.
-const themeBoot = `(function(){try{var P=${JSON.stringify(
-  Object.fromEntries(Object.entries(palettes).map(([k, p]) => [k, [p.paper, p.ink, p.accent, p.muted, p.card]])),
-)};var q=new URLSearchParams(location.search).get('time');var h=+new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Dhaka',hour:'2-digit',hour12:false}).format(new Date())%24;var m=+new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Dhaka',minute:'2-digit'}).format(new Date());var x=h+m/60;var ph=P[q]?q:(x>=5&&x<8?'dawn':x>=8&&x<16.5?'day':x>=16.5&&x<19?'dusk':'night');var c=P[ph],r=document.documentElement;r.dataset.phase=ph;['--paper','--ink','--accent','--muted','--card'].forEach(function(k,i){r.style.setProperty(k,c[i])});}catch(e){}})();`;
+// Pick the right light before first paint (no flash).
+const boot = `(function(){try{var h=+new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Dhaka',hour:'2-digit',hour12:false}).format(new Date())%24;var d=h>=17||h<5;var m=localStorage.getItem('ia:mode');if(m==='dark')d=true;if(m==='light')d=false;var r=document.documentElement;r.dataset.dark=d;if(d){r.style.setProperty('--bg','#0A0A0B');r.style.setProperty('--ink','#E9E8E3');}}catch(e){}})();`;
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" data-phase="day" suppressHydrationWarning>
+    <html lang="en" data-world="editorial" suppressHydrationWarning className={`${sans.variable} ${mono.variable} ${serif.variable} ${pixel.variable} ${pixel2.variable} ${vt.variable} ${orbit.variable}`}>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeBoot }} />
+        <script dangerouslySetInnerHTML={{ __html: boot }} />
       </head>
-      <body className={`${serif.variable} ${sans.variable} ${mono.variable} antialiased`}>
+      <body>
+        <a href="#main" className="skip-link">Skip to content</a>
         <Providers>{children}</Providers>
       </body>
     </html>

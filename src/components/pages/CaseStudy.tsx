@@ -4,177 +4,132 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import MachineImage from "@/components/gl/MachineImage";
-import TornEdge from "@/components/TornEdge";
-import Footer from "@/components/Footer";
-import { roman, works } from "@/lib/career";
-import { useLenis } from "@/components/SmoothScroll";
+import { motion } from "framer-motion";
+import { ventures, type Venture } from "@/lib/content";
+import { ParallaxImg, Reveal, Rise } from "../fx";
 
-gsap.registerPlugin(ScrollTrigger, useGSAP);
+const chapters = ["Overview", "The challenge", "Vision", "Exploration areas", "System architecture", "What's next"];
 
-const sections = [
-  { id: "what", label: "What it is" },
-  { id: "does", label: "What it does" },
-  { id: "numbers", label: "In numbers" },
-  { id: "role", label: "My part" },
-];
-
-/** A single plate: painted hero tearing into paper, sticky index, swash chapters, decision ledger. */
-export default function CaseStudy({ index }: { index: number }) {
-  const w = works[index];
-  const next = works[(index + 1) % works.length];
+export default function CaseStudy({ v }: { v: Venture }) {
   const root = useRef<HTMLDivElement>(null);
-  const reveal = useRef(0);
-  const lenis = useLenis();
-  const [active, setActive] = useState("problem");
+  const [active, setActive] = useState(0);
+  const next = ventures[(ventures.findIndex((x) => x.slug === v.slug) + 1) % ventures.length];
 
   useEffect(() => {
-    const t = setTimeout(() => (reveal.current = 1), 250);
-    return () => clearTimeout(t);
+    const els = chapters.map((_, i) => document.getElementById(`ch-${i}`)).filter(Boolean) as HTMLElement[];
+    const io = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting && setActive(Number(e.target.id.split("-")[1]))), { rootMargin: "-45% 0px -50% 0px" });
+    els.forEach((e) => io.observe(e));
+    return () => io.disconnect();
   }, []);
 
   useGSAP(
     () => {
-      gsap.from(".cs-title > *", { yPercent: 100, duration: 1.3, ease: "expo.out", stagger: 0.08, delay: 0.2 });
-      gsap.to(".cs-hero-img", { yPercent: 14, scale: 1.08, ease: "none", scrollTrigger: { trigger: ".cs-hero", start: "top top", end: "bottom top", scrub: true } });
-      sections.forEach((s) =>
-        ScrollTrigger.create({ trigger: `#${s.id}`, start: "top 50%", end: "bottom 50%", onToggle: (st) => st.isActive && setActive(s.id) }),
-      );
-      gsap.utils.toArray<HTMLElement>(".cs-reveal").forEach((el) =>
-        gsap.from(el, { y: 40, opacity: 0, duration: 1, ease: "power3.out", scrollTrigger: { trigger: el, start: "top 85%" } }),
-      );
+      gsap.from(".arch-layer", { y: 40, opacity: 0, stagger: 0.12, duration: 0.9, ease: "expo.out", scrollTrigger: { trigger: ".arch-diagram", start: "top 75%" } });
+      gsap.from(".arch-link", { scaleY: 0, transformOrigin: "top", stagger: 0.12, duration: 0.6, ease: "power2.out", scrollTrigger: { trigger: ".arch-diagram", start: "top 70%" } });
+      gsap.to(".arch-pulse", { opacity: 0.25, repeat: -1, yoyo: true, duration: 1.1, ease: "sine.inOut" });
     },
     { scope: root },
   );
 
   return (
     <div ref={root}>
-      <header className="cs-hero relative h-[96svh] overflow-hidden bg-ink">
-        <div className="cs-hero-img absolute inset-0">
-          <MachineImage photo={w.img} mode="pixel" cell={48} progressRef={reveal} className="h-full w-full" />
+      <section aria-labelledby="cs-title" className="relative h-[86svh] min-h-[560px] overflow-hidden bg-[#2B3CFF] text-white">
+        <ParallaxImg src={v.img} alt="" className="absolute inset-0 opacity-45 mix-blend-screen" amount={10} />
+        <div className="absolute left-5 top-28 flex flex-wrap gap-2 md:left-10">
+          <span className="label rounded-[var(--radius)] bg-white px-3 py-1.5 text-[#2B3CFF]">{v.status}</span>
+          <span className="label rounded-[var(--radius)] border border-white/70 px-3 py-1.5">{v.category}</span>
         </div>
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,14,40,0.72)_0%,rgba(10,14,40,0.5)_35%,rgba(10,14,40,0.55)_60%,rgba(10,14,40,0.92)_100%)]" />
-        <div className="absolute inset-x-5 bottom-28 flex flex-wrap items-end justify-between gap-6 text-[#f8f3e7] md:inset-x-10">
-          <div>
-            <p className="label">
-              Plate {roman[index]} · {w.tag} · {w.role}
-            </p>
-            <h1 className="cs-title mt-3 overflow-hidden font-serif text-[18vw] serif-tight md:text-[13vw]">
-              <span className="inline-block">{w.name}</span>
-              {w.italic && <em className="inline-block"> {w.italic}</em>}
-            </h1>
-          </div>
-          <p className="max-w-sm font-serif text-2xl italic leading-snug">{w.logline}</p>
-        </div>
-        <div className="absolute inset-x-0 bottom-0">
-          <TornEdge />
-        </div>
-      </header>
+        <h1 id="cs-title" className="display absolute bottom-6 left-4 text-[22vw] leading-[0.85] md:bottom-4 md:left-8 md:text-[16vw] xl:text-[260px]"><Reveal text={v.name.split(" / ")[0]} /></h1>
+        <p className="display absolute bottom-10 right-5 hidden max-w-[340px] text-[28px] italic leading-8 md:block md:right-10">{v.line}</p>
+      </section>
 
-      <div className="relative flex gap-16 bg-paper px-5 pt-16 md:px-10">
-        <aside className="sticky top-28 hidden h-fit w-52 shrink-0 lg:block">
-          <p className="font-serif text-2xl leading-tight">
-            Plate {roman[index]}
-            <br />
-            <em>
-              {w.name}
-              {w.italic ? ` ${w.italic}` : ""}
-            </em>
-          </p>
-          <ul className="mt-6 flex flex-col gap-2 font-mono text-[11px] uppercase tracking-[0.14em]">
-            {sections.map((s, i) => (
-              <li key={s.id}>
-                <button onClick={() => lenis?.scrollTo(`#${s.id}`, { offset: -100 })} className={`flex w-full justify-between ${active === s.id ? "text-ink" : "text-muted hover:text-ink"}`}>
-                  <span>{active === s.id ? "● " : ""}{s.label}</span>
-                  <span>0{i + 1}</span>
-                </button>
+      <div className="mx-auto grid max-w-[1440px] gap-12 px-5 py-20 md:grid-cols-[220px_1fr] md:px-10 md:py-28">
+        <nav aria-label="Chapters" className="hidden md:block">
+          <ol className="sticky top-28 flex flex-col gap-3">
+            {chapters.map((c, i) => (
+              <li key={c}>
+                <a href={`#ch-${i}`} aria-current={active === i ? "true" : undefined} className={`label flex items-center gap-2 transition-colors ${active === i ? "text-ink" : "text-muted hover:text-ink"}`}>
+                  <span className={`h-2 w-2 transition-all ${active === i ? "bg-accent" : "bg-transparent"}`} />0{i + 1} {c}
+                </a>
               </li>
             ))}
-          </ul>
-          <p className="label mt-6 border-t hair pt-4 text-muted">← <Link href="/#works">All plates</Link></p>
-        </aside>
+            <li className="mt-3 h-0.5 bg-[var(--hair)]"><motion.div className="h-full bg-accent" animate={{ width: `${((active + 1) / chapters.length) * 100}%` }} /></li>
+          </ol>
+        </nav>
 
-        <div className="min-w-0 flex-1 pb-24">
-          <dl className="cs-reveal grid grid-cols-2 border-y border-ink md:grid-cols-4">
-            {w.facts.map((f) => (
-              <div key={f.k} className="py-4 pr-4">
-                <dt className="label text-muted">{f.k}</dt>
-                <dd className="mt-1 font-serif text-2xl">{f.v}</dd>
-              </div>
+        <div className="flex flex-col gap-28">
+          <section id="ch-0" aria-label="Overview" className="grid grid-cols-2 border-t border-ink md:grid-cols-4">
+            {[["Role", "Product architect"], ["Status", `${v.status} · not shipped`], ["Year", "2026"], ["Scope", "Strategy · IA · System"]].map(([k, val]) => (
+              <div key={k} className="flex flex-col gap-2 pt-5"><span className="label text-muted">{k}</span><span className="text-[16px]">{val}</span></div>
             ))}
-          </dl>
-
-          <section id="what" className="mt-20">
-            <p className="label text-muted">01 — What it is</p>
-            <h2 className="cs-reveal mt-6 flex items-end gap-1 font-serif">
-              <span className="text-[150px] italic leading-[0.8] md:text-[220px]">{w.what.cap}</span>
-              <span className="pb-2 text-5xl serif-tight md:text-7xl">{w.what.lead}</span>
-            </h2>
-            <div className="cs-reveal mt-10 grid gap-8 text-lg leading-relaxed md:grid-cols-2">
-              {w.what.body.map((p) => <p key={p}>{p}</p>)}
-            </div>
           </section>
-
-          <section id="does" className="mt-24">
-            <p className="label text-muted">02 — What it does</p>
-            <ol className="mt-6 border-t border-ink">
-              {w.features.map((d, i) => (
-                <li key={d.title} className="cs-reveal grid gap-4 border-b hair py-6 md:grid-cols-[4rem_1fr_24rem] md:items-baseline">
-                  <span className="font-serif text-4xl">{["i.", "ii.", "iii.", "iv."][i]}</span>
-                  <span className="font-serif text-3xl leading-tight">{d.title}</span>
-                  <span className="text-[15px] leading-relaxed">{d.body}</span>
+          <section id="ch-1" aria-labelledby="ch1-h">
+            <p className="label text-accent">02 — The challenge</p>
+            <h2 id="ch1-h" className="display mt-5 text-[11vw] leading-[0.95] md:text-[76px]">{v.challenge[0]} <em className="text-muted">{v.challenge[1]}</em></h2>
+          </section>
+          <section id="ch-2" aria-labelledby="ch2-h" className="grid gap-8 md:grid-cols-2">
+            <p className="label text-accent md:col-span-2">03 — Vision</p>
+            <h2 id="ch2-h" className="sr-only">Vision</h2>
+            <p className="font-serif text-[28px] leading-[1.2] md:text-[36px]">{v.vision}</p>
+            <Rise><div className="ui-arch h-[360px] bg-ink">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={v.img} alt="" className="h-full w-full object-cover grayscale" /></div></Rise>
+          </section>
+          <section id="ch-3" aria-labelledby="ch3-h">
+            <p className="label text-accent">04 — Exploration areas</p>
+            <h2 id="ch3-h" className="sr-only">Exploration areas</h2>
+            <ul className="mt-6 border-t border-ink">
+              {v.areas.map((a, i) => (
+                <li key={a} className="group flex items-baseline gap-6 border-b border-[var(--hair)] py-5">
+                  <span className="pixel w-10 text-xs text-muted">A.0{i + 1}</span>
+                  <span className="display text-[34px] leading-none transition-all duration-500 group-hover:translate-x-2 group-hover:italic group-hover:text-accent md:text-[52px]">{a}</span>
                 </li>
               ))}
-            </ol>
+            </ul>
           </section>
-
-          <section id="numbers" className="mt-24">
-            <div className="cs-reveal flex flex-wrap items-center gap-10 border-y border-ink py-10">
-              <span className="whitespace-nowrap font-serif text-[120px] leading-[0.8] serif-tight md:text-[200px]">{w.resultBig}</span>
-              <div className="max-w-xl">
-                <p className="label text-muted">03 — In numbers</p>
-                <p className="mt-3 font-serif text-3xl leading-tight md:text-4xl">{w.resultNote}</p>
-              </div>
-            </div>
-            {w.numbers.length > 1 && (
-              <dl className="cs-reveal grid grid-cols-2 border-b hair md:grid-cols-3">
-                {w.numbers.map((n) => (
-                  <div key={n.label} className="border-r hair py-6 pr-4 last:border-r-0">
-                    <dt className="font-serif text-5xl">{n.value}</dt>
-                    <dd className="label mt-2 text-muted">{n.label}</dd>
-                  </div>
-                ))}
-              </dl>
-            )}
-          </section>
-
-          <section id="role" className="cs-reveal mt-24 grid gap-8 md:grid-cols-[1fr_auto] md:items-end">
-            <div>
-              <p className="label text-muted">04 — My part</p>
-              <p className="mt-3 font-serif text-4xl leading-tight">{w.role}</p>
-              <p className="mt-3 max-w-2xl text-lg leading-relaxed text-muted">{w.contribution}</p>
-            </div>
-            <a href={w.url} target="_blank" rel="noreferrer" data-cursor="Visit" className="rounded-full bg-ink px-7 py-4 font-mono text-xs uppercase tracking-[0.18em] text-paper hover:opacity-85">
-              Visit the live site ↗
-            </a>
-          </section>
-
-          <Link href={`/works/${next.slug}`} className="group mt-16 flex items-end justify-between gap-6" data-cursor="Next">
-            <div>
-              <p className="label text-muted">Next plate — {roman[(index + 1) % works.length]} of {roman[works.length - 1]}</p>
-              <p className="mt-2 font-serif text-7xl serif-tight transition-transform duration-500 group-hover:translate-x-4 md:text-9xl">
-                {next.name}
-                {next.italic && <em> {next.italic}</em>} <em>→</em>
-              </p>
-            </div>
-            <div className="hidden w-52 rotate-3 border border-ink bg-card p-2 md:block">
-              <MachineImage photo={next.img} alt="" mode="dither" progress={0} className="aspect-[4/3]" />
-            </div>
-          </Link>
         </div>
       </div>
-      <Footer showStats={false} />
+
+      <section id="ch-4" aria-labelledby="ch4-h" className="grid-squares bg-[#0A0A0B] py-24 text-[#E9E8E3]" style={{ ["--ink" as string]: "#E9E8E3" }}>
+        <div className="mx-auto max-w-[1440px] px-5 md:px-10">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div><p className="label text-[#4B5BFF]">05 — System architecture</p><h2 id="ch4-h" className="display mt-3 text-[11vw] leading-none md:text-[64px]">Four layers, <em className="text-[#8b8f96]">one gate.</em></h2></div>
+            <p className="label text-[#8b8f96]">Fig. 05 · {v.name} · {v.status}</p>
+          </div>
+          <div className="arch-diagram mt-12 grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[1fr_220px]">
+            <div className="flex flex-col">
+              {v.layers.map((l, i) => (
+                <div key={l.label}>
+                  {i > 0 && <div className="arch-link mx-auto h-7 w-px bg-white/40" aria-hidden />}
+                  <div className={`arch-layer grid border md:grid-cols-[180px_1fr] ${l.highlight && i === 1 ? "border-[#2B3CFF] bg-[#2B3CFF]/10" : "border-white/20"}`}>
+                    <div className="flex items-center gap-3 border-b border-white/20 p-4 md:flex-col md:items-start md:justify-center md:border-b-0 md:border-r">
+                      <span className="pixel text-[11px] text-[#8b8f96]">L{i + 1}</span>
+                      <span className="label">{l.label}</span>
+                    </div>
+                    <ul className="grid grid-cols-2 gap-3 p-4 md:grid-cols-4">
+                      {l.items.map((it) => (
+                        <li key={it} tabIndex={0} className={`p-3 text-sm outline-offset-2 transition-colors hover:bg-white hover:text-[#101010] focus-visible:bg-white focus-visible:text-[#101010] ${it === l.highlight ? (i === 1 ? "bg-[#2B3CFF] text-white" : "bg-[#E9E8E3] font-serif text-lg italic text-[#101010]") : i === v.layers.length - 1 ? "border border-dashed border-white/30 font-mono text-xs text-[#9DA1A7]" : "border border-white/25"}`}>
+                          {it === l.highlight && i === 1 && <span className="arch-pulse mr-2 inline-block h-2 w-2 rounded-full bg-white" aria-hidden />}
+                          {it}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <aside aria-label="Human in the loop" className="arch-layer flex flex-col justify-between gap-8 border border-[#2B3CFF] bg-[#2B3CFF]/10 p-5">
+              <div><span className="pixel text-[11px] text-[#4B5BFF]">GATE</span><p className="display mt-2 text-[32px] leading-none">Human in the loop</p></div>
+              <ul className="label flex flex-col gap-2.5 text-[#9DA1A7]">{v.gate.map((g) => <li key={g}>◉ {g}</li>)}</ul>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section id="ch-5" aria-label="Next project" className="mx-auto max-w-[1440px] border-b border-[var(--hair)] px-5 py-24 md:px-10">
+        <p className="label text-muted">Next project · {next.status}</p>
+        <Link href={`/work/${next.slug}`} className="group mt-3 block" data-cursor="Next">
+          <span className="display text-[14vw] leading-[0.9] transition-colors group-hover:text-accent md:text-[140px]">{next.name.split(" / ")[0]} <span className="inline-block transition-transform duration-500 group-hover:translate-x-4">→</span></span>
+        </Link>
+      </section>
     </div>
   );
 }

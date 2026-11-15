@@ -1,11 +1,5 @@
 import type { Metadata } from "next";
-import Letter from "@/components/pages/Letter";
+import { Contact } from "@/components/pages/People";
 
-export const metadata: Metadata = {
-  title: "Write me a letter",
-  description: "Contact Imtiaz Ahmed, Agentic Product Manager in Dhaka.",
-};
-
-export default function Page() {
-  return <Letter />;
-}
+export const metadata: Metadata = { title: "Let's Talk", description: "Connect with Imtiaz Ahmed about AI products, product strategy, digital transformation, and strategic collaborations." };
+export default function Page() { return <Contact />; }
